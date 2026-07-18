@@ -31,5 +31,5 @@ Conventional Commits に沿って、次の形式でコミットします。
   - 雑務: `chore/<issue番号>-<内容>`
 - 作業ブランチから `main` へPull Requestを作成する。
 - Pull Requestのタイトルは、対応するGitHub Issueのタイトルと原則同じにする。
-- Pull Requestは **Squash and merge** でマージする。作業中の複数コミットを1つにまとめ、PRタイトル（対応するIssueタイトル）を `main` に残る最終コミットメッセージとして使う。
+- Pull Requestは通常の **Create a merge commit** でマージする。作業ブランチのコミット履歴と、対応するIssueタイトルを持つマージコミットを `main` に残す。
 - マージ後の作業ブランチは削除する。
