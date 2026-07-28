@@ -97,3 +97,12 @@ export const emptyGroup: ExpenseGroup = {
     { id: "participant-alice-empty", user: users.alice, status: "active", joinedAt: "2026-07-04T09:00:00Z" },
   ],
 };
+
+export const emptySettlement: Settlement = {
+  groupId: emptyGroup.id,
+  calculatedAt: null,
+  participantSummaries: [
+    { participantId: "participant-alice-empty", paidAmount: 0, burdenAmount: 0, balance: 0 },
+  ],
+  transfers: [],
+};

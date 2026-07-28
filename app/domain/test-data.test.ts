@@ -1,4 +1,4 @@
-import { sampleExpenses, sampleGroup, sampleSettlement } from "@/domain/test-data";
+import { emptySettlement, sampleExpenses, sampleGroup, sampleSettlement } from "@/domain/test-data";
 
 describe("ドメインの固定データ", () => {
   it("各費目の立替額合計が整数円の総額と一致する", () => {
@@ -33,5 +33,9 @@ describe("ドメインの固定データ", () => {
 
     expect(balances).toBe(0);
     expect(transferTotal).toBe(1_754);
+  });
+
+  it("費目がない場合は精算計算日時を持たない", () => {
+    expect(emptySettlement.calculatedAt).toBeNull();
   });
 });

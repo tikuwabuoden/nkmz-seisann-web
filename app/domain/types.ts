@@ -74,7 +74,7 @@ export interface Transfer {
 
 export interface Settlement {
   groupId: Id;
-  calculatedAt: string;
+  calculatedAt: string | null;
   participantSummaries: ParticipantSettlement[];
   transfers: Transfer[];
 }
