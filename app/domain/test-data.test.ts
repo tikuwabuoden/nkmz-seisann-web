@@ -1,7 +1,7 @@
 import { sampleExpenses, sampleGroup, sampleSettlement } from "@/domain/test-data";
 
-describe("sample domain data", () => {
-  it("keeps each expense's payer total equal to its JPY amount", () => {
+describe("ドメインの固定データ", () => {
+  it("各費目の立替額合計が整数円の総額と一致する", () => {
     for (const expense of sampleExpenses) {
       const paidTotal = expense.paidBy.reduce((total, payment) => total + payment.amount, 0);
 
@@ -9,7 +9,7 @@ describe("sample domain data", () => {
     }
   });
 
-  it("includes inactive participants, zero weights, and hundredth weights", () => {
+  it("無効参加者、重み0、小数第2位の重みを含む", () => {
     expect(sampleGroup.participants).toContainEqual(
       expect.objectContaining({ status: "inactive" }),
     );
@@ -21,7 +21,7 @@ describe("sample domain data", () => {
     );
   });
 
-  it("balances the settlement and its transfer plan", () => {
+  it("精算差額と送金案の合計が整合する", () => {
     const balances = sampleSettlement.participantSummaries.reduce(
       (total, participant) => total + participant.balance,
       0,
