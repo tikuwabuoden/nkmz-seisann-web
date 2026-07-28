@@ -76,6 +76,5 @@ export interface Settlement {
   groupId: Id;
   calculatedAt: string;
   participantSummaries: ParticipantSettlement[];
-  /** 精算不要の場合は null ではなく空配列。 */
   transfers: Transfer[];
 }
