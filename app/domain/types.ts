@@ -1,11 +1,11 @@
 export type Id = string;
 
-/** An integer amount in Japanese yen. */
+/** 整数の日本円金額。 */
 export type Jpy = number;
 
 /**
- * A share weight expressed in hundredths.
- * For example, 1.25 is represented as 125 and 0.50 as 50.
+ * 小数第2位までを整数化した分担の重み。
+ * 例: 1.25 は 125、0.50 は 50 と表す。
  */
 export type WeightHundredths = number;
 
