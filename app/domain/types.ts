@@ -11,14 +11,18 @@ export type WeightHundredths = number;
 
 export type ParticipantStatus = "active" | "inactive";
 
-export interface User {
+/**
+ * nkmz に登録されたユーザー。
+ * Discord ID は認証基盤の内部情報であり、精算 Web の V1 API では扱わない。
+ */
+export interface NkmzUser {
   id: Id;
   username: string;
 }
 
 export interface Participant {
   id: Id;
-  user: User;
+  user: NkmzUser;
   status: ParticipantStatus;
   joinedAt: string;
 }
@@ -26,6 +30,7 @@ export interface Participant {
 export interface ExpenseGroup {
   id: Id;
   name: string;
+  /** 未アーカイブのグループは null、アーカイブ済みなら日時。 */
   archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -71,5 +76,6 @@ export interface Settlement {
   groupId: Id;
   calculatedAt: string;
   participantSummaries: ParticipantSettlement[];
+  /** 精算不要の場合は null ではなく空配列。 */
   transfers: Transfer[];
 }

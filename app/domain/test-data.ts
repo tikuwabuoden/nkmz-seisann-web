@@ -1,11 +1,11 @@
-import type { Expense, ExpenseGroup, Settlement, User } from "@/domain/types";
+import type { Expense, ExpenseGroup, NkmzUser, Settlement } from "@/domain/types";
 
 export const users = {
   alice: { id: "user-alice", username: "alice" },
   bob: { id: "user-bob", username: "bob" },
   carol: { id: "user-carol", username: "carol" },
   dave: { id: "user-dave", username: "dave" },
-} as const satisfies Record<string, User>;
+} as const satisfies Record<string, NkmzUser>;
 
 export const sampleGroup: ExpenseGroup = {
   id: "group-tokyo-2026",
