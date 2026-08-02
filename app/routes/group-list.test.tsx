@@ -36,4 +36,17 @@ describe("精算グループ一覧画面", () => {
       "/groups/group-spring-drinking-party",
     );
   });
+
+  it("グループ作成画面へ遷移するリンクを表示する", () => {
+    render(
+      <MemoryRouter>
+        <GroupList />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("link", { name: "精算グループを作成" })).toHaveAttribute(
+      "href",
+      "/groups/new",
+    );
+  });
 });

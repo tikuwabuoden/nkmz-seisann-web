@@ -1,6 +1,8 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { Link } from "react-router";
 
+import { AppFixedActionArea } from "@/components/layout/app-fixed-action-area";
+import { Button } from "@/components/ui/button";
 import { groupListItems } from "@/features/groups/group-list-data";
 import {
   Table,
@@ -17,7 +19,7 @@ export function meta() {
 
 export default function GroupList() {
   return (
-    <main className="p-4">
+    <main className="p-4 pb-24">
       <h1 className="mb-6 text-3xl font-semibold tracking-tight">精算グループ</h1>
       <Table aria-label="精算グループ一覧">
         <TableHeader>
@@ -53,6 +55,14 @@ export default function GroupList() {
           ))}
         </TableBody>
       </Table>
+      <AppFixedActionArea>
+        <Button asChild className="w-full">
+          <Link to="/groups/new">
+            <Plus aria-hidden="true" />
+            精算グループを作成
+          </Link>
+        </Button>
+      </AppFixedActionArea>
     </main>
   );
 }
