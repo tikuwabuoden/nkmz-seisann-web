@@ -32,11 +32,13 @@ export default function GroupList() {
         <TableBody>
           {groupListItems.map((group) => (
             <TableRow key={group.id}>
-              <TableCell className="font-medium whitespace-normal break-words">
-                {group.name}
+              <TableCell className="font-medium">{group.name}</TableCell>
+              <TableCell noWrap className="text-center">
+                {group.participantCount}人
               </TableCell>
-              <TableCell className="text-center">{group.participantCount}人</TableCell>
-              <TableCell className="text-center">{group.expenseCount}件</TableCell>
+              <TableCell noWrap className="text-center">
+                {group.expenseCount}件
+              </TableCell>
               <TableCell>
                 <ChevronRight aria-hidden="true" className="ml-auto size-5 text-primary" />
               </TableCell>
