@@ -1,4 +1,5 @@
 import { ChevronRight } from "lucide-react";
+import { Link } from "react-router";
 
 import { groupListItems } from "@/features/groups/group-list-data";
 import {
@@ -39,8 +40,14 @@ export default function GroupList() {
               <TableCell noWrap className="text-center">
                 {group.expenseCount}件
               </TableCell>
-              <TableCell>
-                <ChevronRight aria-hidden="true" className="ml-auto size-5 text-primary" />
+              <TableCell noWrap>
+                <Link
+                  aria-label={`${group.name}の詳細を開く`}
+                  className="ml-auto flex size-11 items-center justify-center text-primary"
+                  to={`/groups/${group.id}`}
+                >
+                  <ChevronRight aria-hidden="true" className="size-5" />
+                </Link>
               </TableCell>
             </TableRow>
           ))}
