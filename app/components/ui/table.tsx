@@ -76,12 +76,17 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   )
 }
 
-function TableCell({ className, ...props }: React.ComponentProps<"td">) {
+interface TableCellProps extends React.ComponentProps<"td"> {
+  noWrap?: boolean
+}
+
+function TableCell({ className, noWrap = false, ...props }: TableCellProps) {
   return (
     <td
       data-slot="table-cell"
       className={cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
+        "p-2 align-middle break-words [&:has([role=checkbox])]:pr-0",
+        noWrap && "whitespace-nowrap",
         className
       )}
       {...props}
