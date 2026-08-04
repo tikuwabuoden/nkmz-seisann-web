@@ -3,7 +3,7 @@ export type ApiRequestOptions = Omit<RequestInit, "body" | "credentials"> & {
 };
 
 export interface ApiClient {
-  request<T>(path: string, options?: ApiRequestOptions): Promise<T>;
+  request<T>(path: string, options?: ApiRequestOptions): Promise<T | undefined>;
 }
 
 export class ApiError extends Error {
@@ -19,7 +19,7 @@ export class ApiError extends Error {
 /** Cookie を含めて JSON API を呼び出すクライアントを生成する。 */
 export function createApiClient(fetchFunction: typeof fetch = fetch): ApiClient {
   return {
-    async request<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
+    async request<T>(path: string, options: ApiRequestOptions = {}): Promise<T | undefined> {
       const { body, headers: requestHeaders, ...requestOptions } = options;
       const headers = new Headers(requestHeaders);
 
@@ -38,7 +38,13 @@ export function createApiClient(fetchFunction: typeof fetch = fetch): ApiClient 
         throw new ApiError(response.status, response.statusText);
       }
 
-      return (await response.json()) as T;
+      const responseBody = await response.text();
+
+      if (responseBody.trim() === "") {
+        return undefined;
+      }
+
+      return JSON.parse(responseBody) as T;
     },
   };
 }

@@ -31,4 +31,14 @@ describe("API クライアント", () => {
       statusText: "Unauthorized",
     });
   });
+
+  it.each([
+    ["204 No Content", new Response(null, { status: 204 })],
+    ["本文が空の成功レスポンス", new Response(null, { status: 200 })],
+  ])("%s では undefined を返す", async (_description, response) => {
+    const fetchFunction = vi.fn<typeof fetch>().mockResolvedValue(response);
+    const client = createApiClient(fetchFunction);
+
+    await expect(client.request("/resource", { method: "DELETE" })).resolves.toBeUndefined();
+  });
 });
