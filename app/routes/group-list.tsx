@@ -1,9 +1,11 @@
 import { ChevronRight, Plus } from "lucide-react";
 import { Link } from "react-router";
+import { useQuery } from "@tanstack/react-query";
 
 import { AppFixedActionArea } from "@/components/layout/app-fixed-action-area";
 import { Button } from "@/components/ui/button";
-import { groupListItems } from "@/features/groups/group-list-data";
+import { groupListClient } from "@/features/groups/group-list-client";
+import { queryKeys } from "@/lib/query-keys";
 import {
   Table,
   TableBody,
@@ -18,6 +20,11 @@ export function meta() {
 }
 
 export default function GroupList() {
+  const { data: groups = [] } = useQuery({
+    queryKey: queryKeys.groups,
+    queryFn: () => groupListClient.list(),
+  });
+
   return (
     <main className="p-4 pb-24">
       <h1 className="mb-6 text-3xl font-semibold tracking-tight">精算グループ</h1>
@@ -33,7 +40,7 @@ export default function GroupList() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {groupListItems.map((group) => (
+          {groups.map((group) => (
             <TableRow key={group.id}>
               <TableCell className="font-medium">{group.name}</TableCell>
               <TableCell noWrap className="text-center">
