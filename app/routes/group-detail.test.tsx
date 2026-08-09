@@ -15,7 +15,7 @@ function renderGroupDetail() {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={["/groups/group-tokyo-2026"]}>
+      <MemoryRouter initialEntries={["/groups/group-summer-camp-2026"]}>
         <Routes>
           <Route element={<GroupDetail />} path="/groups/:groupId" />
         </Routes>

@@ -8,7 +8,7 @@ export const users = {
 } as const satisfies Record<string, NkmzUser>;
 
 export const sampleGroup: ExpenseGroup = {
-  id: "group-tokyo-2026",
+  id: "group-summer-camp-2026",
   name: "Tokyo weekend",
   archivedAt: null,
   createdAt: "2026-07-01T09:00:00Z",
