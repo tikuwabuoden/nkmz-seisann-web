@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { AppFixedActionArea } from "@/components/layout/app-fixed-action-area";
 import { Button } from "@/components/ui/button";
-import { groupListClient } from "@/features/groups/group-list-client";
+import { groupClient } from "@/features/groups/group-client";
 import { queryKeys } from "@/lib/query-keys";
 import {
   Table,
@@ -22,7 +22,7 @@ export function meta() {
 export default function GroupList() {
   const { data: groups = [] } = useQuery({
     queryKey: queryKeys.groups,
-    queryFn: () => groupListClient.list(),
+    queryFn: () => groupClient.list(),
   });
 
   return (
