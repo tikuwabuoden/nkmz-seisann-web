@@ -32,7 +32,7 @@ describe("支払い一覧画面", () => {
   it("モックデータから支払い一覧と合計を表示する", async () => {
     renderGroupDetail();
 
-    expect(await screen.findByRole("cell", { name: "Rail tickets" })).toBeInTheDocument();
+    expect(await screen.findByRole("cell", { name: "新幹線代" })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "¥14,800" })).toBeInTheDocument();
   });
 

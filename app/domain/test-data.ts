@@ -25,7 +25,7 @@ export const sampleExpenses: Expense[] = [
   {
     id: "expense-rail",
     groupId: sampleGroup.id,
-    description: "Rail tickets",
+    description: "新幹線代",
     amount: 4_800,
     memo: null,
     paidBy: [{ participantId: "participant-alice", amount: 4_800 }],
@@ -40,7 +40,7 @@ export const sampleExpenses: Expense[] = [
   {
     id: "expense-hotel",
     groupId: sampleGroup.id,
-    description: "Hotel",
+    description: "宿泊費",
     amount: 9_000,
     memo: "Two payers",
     paidBy: [
@@ -58,7 +58,7 @@ export const sampleExpenses: Expense[] = [
   {
     id: "expense-snacks",
     groupId: sampleGroup.id,
-    description: "Snacks",
+    description: "お菓子代",
     amount: 1_000,
     memo: "Includes a zero weight",
     paidBy: [{ participantId: "participant-alice", amount: 1_000 }],
