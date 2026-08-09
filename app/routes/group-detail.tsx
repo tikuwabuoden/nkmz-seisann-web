@@ -27,7 +27,7 @@ export function meta() {
 
 export default function GroupDetail() {
 	const { groupId = '' } = useParams();
-	const { data: expenses = [] } = useQuery({
+	const { data: expenses = [], isError, isPending } = useQuery({
 		queryKey: queryKeys.expenses(groupId),
 		queryFn: () => expenseClient.list(groupId),
 	});
@@ -47,45 +47,53 @@ export default function GroupDetail() {
 					<TabsTrigger value="settlement">精算結果</TabsTrigger>
 				</TabsList>
 				<TabsContent value="payments" className="pt-4">
-					<Table aria-label="支払い一覧">
-						<TableHeader>
-							<TableRow>
-								<TableHead>内容</TableHead>
-								<TableHead className="text-right">立替額</TableHead>
-								<TableHead>
-									<span className="sr-only">編集</span>
-								</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{expenses.map((expense) => (
-								<TableRow key={expense.id}>
-									<TableCell className="font-medium">{expense.description}</TableCell>
-									<TableCell noWrap className="text-right tabular-nums">
-										{formatJpy(expense.amount)}
-									</TableCell>
-									<TableCell noWrap className="text-right">
-										<Link
-											aria-label={`${expense.description}を編集`}
-											className="ml-auto flex size-11 items-center justify-center text-primary"
-											to={`/groups/${groupId}/expenses/${expense.id}/edit`}
-										>
-											<ChevronRight aria-hidden="true" className="size-5" />
-										</Link>
-									</TableCell>
+					{isPending ? (
+						<p role="status">支払いを読み込んでいます。</p>
+					) : isError ? (
+						<p role="alert">支払いの取得に失敗しました。</p>
+					) : expenses.length === 0 ? (
+						<p>支払いはありません。</p>
+					) : (
+						<Table aria-label="支払い一覧">
+							<TableHeader>
+								<TableRow>
+									<TableHead>内容</TableHead>
+									<TableHead className="text-right">立替額</TableHead>
+									<TableHead>
+										<span className="sr-only">編集</span>
+									</TableHead>
 								</TableRow>
-							))}
-						</TableBody>
-						<TableFooter>
-							<TableRow>
-								<TableCell className="font-semibold">合計</TableCell>
-								<TableCell noWrap className="text-right font-semibold tabular-nums">
-									{formatJpy(totalAmount)}
-								</TableCell>
-								<TableCell />
-							</TableRow>
-						</TableFooter>
-					</Table>
+							</TableHeader>
+							<TableBody>
+								{expenses.map((expense) => (
+									<TableRow key={expense.id}>
+										<TableCell className="font-medium">{expense.description}</TableCell>
+										<TableCell noWrap className="text-right tabular-nums">
+											{formatJpy(expense.amount)}
+										</TableCell>
+										<TableCell noWrap className="text-right">
+											<Link
+												aria-label={`${expense.description}を編集`}
+												className="ml-auto flex size-11 items-center justify-center text-primary"
+												to={`/groups/${groupId}/expenses/${expense.id}/edit`}
+											>
+												<ChevronRight aria-hidden="true" className="size-5" />
+											</Link>
+										</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+							<TableFooter>
+								<TableRow>
+									<TableCell className="font-semibold">合計</TableCell>
+									<TableCell noWrap className="text-right font-semibold tabular-nums">
+										{formatJpy(totalAmount)}
+									</TableCell>
+									<TableCell />
+								</TableRow>
+							</TableFooter>
+						</Table>
+					)}
 				</TabsContent>
 				<TabsContent value="settlement" />
 			</Tabs>
