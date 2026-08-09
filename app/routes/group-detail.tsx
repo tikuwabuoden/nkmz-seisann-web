@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
+import { ChevronRight, Plus } from 'lucide-react';
 import { Link, useParams } from 'react-router';
 
 import { AppFixedActionArea } from '@/components/layout/app-fixed-action-area';
@@ -64,12 +64,13 @@ export default function GroupDetail() {
 									<TableCell noWrap className="text-right tabular-nums">
 										{formatJpy(expense.amount)}
 									</TableCell>
-									<TableCell noWrap>
+									<TableCell noWrap className="text-right">
 										<Link
-											className="text-primary underline-offset-4 hover:underline"
+											aria-label={`${expense.description}を編集`}
+											className="ml-auto flex size-11 items-center justify-center text-primary"
 											to={`/groups/${groupId}/expenses/${expense.id}/edit`}
 										>
-											編集
+											<ChevronRight aria-hidden="true" className="size-5" />
 										</Link>
 									</TableCell>
 								</TableRow>
