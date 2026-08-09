@@ -14,10 +14,10 @@ export const sampleGroup: ExpenseGroup = {
   createdAt: "2026-07-01T09:00:00Z",
   updatedAt: "2026-07-03T12:00:00Z",
   participants: [
-    { id: "participant-alice", user: users.alice, status: "active", joinedAt: "2026-07-01T09:00:00Z" },
-    { id: "participant-bob", user: users.bob, status: "active", joinedAt: "2026-07-01T09:01:00Z" },
-    { id: "participant-carol", user: users.carol, status: "active", joinedAt: "2026-07-01T09:02:00Z" },
-    { id: "participant-dave", user: users.dave, status: "inactive", joinedAt: "2026-07-01T09:03:00Z" },
+    { id: "participant-alice", userId: users.alice.id, username: users.alice.username, active: true, joinedAt: "2026-07-01T09:00:00Z" },
+    { id: "participant-bob", userId: users.bob.id, username: users.bob.username, active: true, joinedAt: "2026-07-01T09:01:00Z" },
+    { id: "participant-carol", userId: users.carol.id, username: users.carol.username, active: true, joinedAt: "2026-07-01T09:02:00Z" },
+    { id: "participant-dave", userId: users.dave.id, username: users.dave.username, active: false, joinedAt: "2026-07-01T09:03:00Z" },
   ],
 };
 
@@ -94,7 +94,7 @@ export const emptyGroup: ExpenseGroup = {
   createdAt: "2026-07-04T09:00:00Z",
   updatedAt: "2026-07-04T09:00:00Z",
   participants: [
-    { id: "participant-alice-empty", user: users.alice, status: "active", joinedAt: "2026-07-04T09:00:00Z" },
+    { id: "participant-alice-empty", userId: users.alice.id, username: users.alice.username, active: true, joinedAt: "2026-07-04T09:00:00Z" },
   ],
 };
 
