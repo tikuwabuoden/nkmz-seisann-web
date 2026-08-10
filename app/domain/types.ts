@@ -9,8 +9,6 @@ export type Jpy = number;
  */
 export type WeightHundredths = number;
 
-export type ParticipantStatus = "active" | "inactive";
-
 /**
  * nkmz に登録されたユーザー。
  * Discord ID は認証基盤の内部情報であり、精算 Web の V1 API では扱わない。
@@ -22,8 +20,9 @@ export interface NkmzUser {
 
 export interface Participant {
   id: Id;
-  user: NkmzUser;
-  status: ParticipantStatus;
+  userId: Id;
+  username: string;
+  active: boolean;
   joinedAt: string;
 }
 

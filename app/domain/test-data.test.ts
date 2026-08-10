@@ -11,7 +11,7 @@ describe("ドメインの固定データ", () => {
 
   it("無効参加者、重み0、小数第2位の重みを含む", () => {
     expect(sampleGroup.participants).toContainEqual(
-      expect.objectContaining({ status: "inactive" }),
+      expect.objectContaining({ active: false }),
     );
     expect(sampleExpenses.flatMap((expense) => expense.burdenShares)).toEqual(
       expect.arrayContaining([
