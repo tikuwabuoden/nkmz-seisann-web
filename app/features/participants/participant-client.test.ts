@@ -1,47 +1,55 @@
 import { describe, expect, it } from "vitest";
 
-import { createMockParticipantClient } from "@/features/participants/participant-client";
 import type { NkmzUser, Participant } from "@/domain/types";
+import { createMockParticipantClient } from "@/features/participants/participant-client";
 
 const groupId = "group-test";
+const alice: NkmzUser = { id: "user-alice", username: "alice" };
+const haruka: NkmzUser = { id: "user-haruka", username: "haruka" };
 const participants: Participant[] = [
   {
     id: "participant-alice",
-    user: { id: "user-alice", username: "あきら" },
-    status: "active",
+    userId: alice.id,
+    username: alice.username,
+    active: true,
     joinedAt: "2026-08-01T00:00:00Z",
   },
 ];
-const users: NkmzUser[] = [
-  participants[0].user,
-  { id: "user-haruka", username: "はるか" },
-];
 
 describe("参加者のモッククライアント", () => {
-  it("グループに紐づく参加者だけを返す", async () => {
-    const client = createMockParticipantClient({ [groupId]: participants });
+  it("検索したユーザーを追加し、無効化と再有効化ができる", async () => {
+    const client = createMockParticipantClient({ [groupId]: participants }, [alice, haruka], alice.id);
 
-    await expect(client.list(groupId)).resolves.toEqual(participants);
-    await expect(client.list("group-another")).resolves.toEqual([]);
+    const addedParticipant = await client.add(groupId, haruka.id);
+    await expect(client.deactivate(groupId, addedParticipant.id)).resolves.toMatchObject({ active: false });
+    await expect(client.activate(groupId, addedParticipant.id)).resolves.toMatchObject({ active: true });
   });
 
-  it("ユーザー名の部分一致で最大10件を検索する", async () => {
-    const searchUsers = Array.from({ length: 11 }, (_, index) => ({
-      id: `user-${index}`,
-      username: `参加者${index}`,
+  it("空の検索、重複追加、20人超過を受け付けない", async () => {
+    const twentyParticipants = Array.from({ length: 20 }, (_, index) => ({
+      id: `participant-${index}`,
+      userId: `user-${index}`,
+      username: `user${index}`,
+      active: true,
+      joinedAt: "2026-08-01T00:00:00Z",
     }));
-    const client = createMockParticipantClient({}, searchUsers);
+    const limitClient = createMockParticipantClient(
+      { [groupId]: twentyParticipants },
+      [...twentyParticipants.map(({ userId, username }) => ({ id: userId, username })), haruka],
+      "user-0",
+    );
+    const duplicateClient = createMockParticipantClient({ [groupId]: participants }, [alice, haruka], alice.id);
 
-    await expect(client.searchUsers("加者")).resolves.toHaveLength(10);
+    await expect(duplicateClient.searchUsers("")).rejects.toThrow("検索文字列は1文字以上32文字以内で入力してください。");
+    await expect(duplicateClient.add(groupId, alice.id)).rejects.toThrow("このユーザーはすでに参加しています。");
+    await expect(limitClient.add(groupId, haruka.id)).rejects.toThrow("参加者は20人までです。");
   });
 
-  it("検索したユーザーを参加者として追加し、状態を変更できる", async () => {
-    const client = createMockParticipantClient({ [groupId]: participants }, users);
+  it("自分自身を無効化できない", async () => {
+    const client = createMockParticipantClient({ [groupId]: participants }, [alice], alice.id);
 
-    const addedParticipant = await client.add(groupId, "user-haruka");
-    await expect(client.updateStatus(groupId, addedParticipant.id, "inactive")).resolves.toMatchObject({
-      id: addedParticipant.id,
-      status: "inactive",
-    });
+    await expect(client.deactivate(groupId, "participant-alice")).rejects.toThrow(
+      "自分自身を無効化することはできません。",
+    );
   });
 });

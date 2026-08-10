@@ -168,13 +168,13 @@ export default function ParticipantManagement() {
               />
             ))}
             {addParticipant.isError ? <p role="alert">参加者の追加に失敗しました。</p> : null}
-            {participantActivityMutation.isError ? <p role="alert">参加状態の変更に失敗しました。</p> : null}
           </div>
         ) : null}
       </section>
 
       {participantsQuery.isPending ? <p role="status">参加者を読み込んでいます。</p> : null}
       {participantsQuery.isError ? <p role="alert">参加者の取得に失敗しました。</p> : null}
+      {participantActivityMutation.isError ? <p role="alert">参加状態の変更に失敗しました。</p> : null}
       {!participantsQuery.isPending && !participantsQuery.isError ? (
         <>
           <ParticipantTable
