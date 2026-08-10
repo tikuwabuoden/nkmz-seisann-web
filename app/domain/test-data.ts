@@ -1,10 +1,13 @@
 import type { Expense, ExpenseGroup, NkmzUser, Settlement } from "@/domain/types";
 
 export const users = {
-  alice: { id: "user-alice", username: "alice" },
-  bob: { id: "user-bob", username: "bob" },
-  carol: { id: "user-carol", username: "carol" },
-  dave: { id: "user-dave", username: "dave" },
+  alice: { id: "user-alice", username: "akira" },
+  bob: { id: "user-bob", username: "yu" },
+  carol: { id: "user-carol", username: "saki" },
+  dave: { id: "user-dave", username: "takumi" },
+  haruka: { id: "user-haruka", username: "haruka" },
+  haruto: { id: "user-haruto", username: "haruto" },
+  haruna: { id: "user-haruna", username: "haruna" },
 } as const satisfies Record<string, NkmzUser>;
 
 export const sampleGroup: ExpenseGroup = {
