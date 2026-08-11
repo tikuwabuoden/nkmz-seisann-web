@@ -69,6 +69,58 @@ describe("分担額計算", () => {
     ]);
   });
 
+  it("負担者の入力順ではなく精算グループへの参加順で端数を配分する", () => {
+    expect(calculateExpenseAllocation({
+      amount: 1_000,
+      payerId: "alice",
+      participants,
+      shares: [
+        { participantId: "carol", weight: 100 },
+        { participantId: "bob", weight: 100 },
+        { participantId: "alice", weight: 100 },
+      ],
+    })).toEqual([
+      { participantId: "carol", allocatedAmount: 333 },
+      { participantId: "bob", allocatedAmount: 334 },
+      { participantId: "alice", allocatedAmount: 333 },
+    ]);
+  });
+
+  it("総額が1円でも端数を優先順位に従って配分し、合計を一致させる", () => {
+    const allocations = calculateExpenseAllocation({
+      amount: 1,
+      payerId: "alice",
+      participants,
+      shares: [
+        { participantId: "alice", weight: 100 },
+        { participantId: "bob", weight: 100 },
+        { participantId: "carol", weight: 100 },
+      ],
+    });
+
+    expect(allocations).toEqual([
+      { participantId: "alice", allocatedAmount: 0 },
+      { participantId: "bob", allocatedAmount: 1 },
+      { participantId: "carol", allocatedAmount: 0 },
+    ]);
+    expect(allocations.reduce((total, allocation) => total + allocation.allocatedAmount, 0)).toBe(1);
+  });
+
+  it("重みの合計が大きい場合でも配分額の合計を総額と一致させる", () => {
+    const allocations = calculateExpenseAllocation({
+      amount: 9_999_999,
+      payerId: "alice",
+      participants,
+      shares: [
+        { participantId: "alice", weight: 9_999_999 },
+        { participantId: "bob", weight: 1 },
+        { participantId: "carol", weight: 1 },
+      ],
+    });
+
+    expect(allocations.reduce((total, allocation) => total + allocation.allocatedAmount, 0)).toBe(9_999_999);
+  });
+
   it("重みがすべて0の場合は計算できない", () => {
     expect(() => calculateExpenseAllocation({
       amount: 100,
