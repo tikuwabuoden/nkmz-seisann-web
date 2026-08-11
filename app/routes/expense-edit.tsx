@@ -4,6 +4,15 @@ import { useNavigate, useParams } from 'react-router';
 
 import { AppFixedActionArea } from '@/components/layout/app-fixed-action-area';
 import { Button } from '@/components/ui/button';
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
 import type { Expense, Participant } from '@/domain/types';
 import { expenseClient } from '@/features/expenses/expense-client';
 import { ExpenseFormFields } from '@/features/expenses/expense-form-fields';
@@ -69,9 +78,18 @@ function ExpenseEditForm({ expense, groupId, participants }: ExpenseEditFormProp
 	const queryClient = useQueryClient();
 	const [form, setForm] = useState<ExpenseFormValues>(() => createExpenseEditForm(expense));
 	const [errors, setErrors] = useState<string[]>([]);
+	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 	const updateExpense = useMutation({
 		mutationFn: (input: NonNullable<ReturnType<typeof validateExpenseForm>['input']>) =>
 			expenseClient.update(groupId, expense.id, input),
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({ queryKey: queryKeys.expenses(groupId) });
+			await queryClient.invalidateQueries({ queryKey: queryKeys.expense(groupId, expense.id) });
+			navigate(`/groups/${groupId}`);
+		},
+	});
+	const deleteExpense = useMutation({
+		mutationFn: () => expenseClient.delete(groupId, expense.id),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: queryKeys.expenses(groupId) });
 			await queryClient.invalidateQueries({ queryKey: queryKeys.expense(groupId, expense.id) });
@@ -103,14 +121,49 @@ function ExpenseEditForm({ expense, groupId, participants }: ExpenseEditFormProp
 			</form>
 			<AppFixedActionArea>
 				<Button
-					className="w-full"
-					disabled={updateExpense.isPending}
+					className="flex-1"
+					disabled={deleteExpense.isPending || updateExpense.isPending}
+					onClick={() => setIsDeleteDialogOpen(true)}
+					type="button"
+					variant="destructive"
+				>
+					削除
+				</Button>
+				<Button
+					className="flex-1"
+					disabled={updateExpense.isPending || deleteExpense.isPending}
 					form="expense-edit-form"
 					type="submit"
 				>
 					保存する
 				</Button>
 			</AppFixedActionArea>
+			<Dialog onOpenChange={setIsDeleteDialogOpen} open={isDeleteDialogOpen}>
+				<DialogContent showCloseButton={false}>
+					<DialogHeader>
+						<DialogTitle>費目を削除しますか？</DialogTitle>
+						<DialogDescription>
+							削除した費目は元に戻せません。
+						</DialogDescription>
+					</DialogHeader>
+					{deleteExpense.isError ? <p role="alert">費目の削除に失敗しました。</p> : null}
+					<DialogFooter>
+						<DialogClose asChild>
+							<Button disabled={deleteExpense.isPending} type="button" variant="outline">
+								キャンセル
+							</Button>
+						</DialogClose>
+						<Button
+							disabled={deleteExpense.isPending}
+							onClick={() => deleteExpense.mutate()}
+							type="button"
+							variant="destructive"
+						>
+							削除する
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</main>
 	);
 }

@@ -50,4 +50,21 @@ describe("費目編集画面", () => {
       );
     });
   });
+
+  it("削除確認後に費目を削除できる", async () => {
+    vi.spyOn(participantClient, "list").mockResolvedValue(sampleGroup.participants);
+    vi.spyOn(expenseClient, "get").mockResolvedValue(sampleExpenses[0]);
+    const deleteExpense = vi.spyOn(expenseClient, "delete").mockResolvedValue();
+
+    renderExpenseEdit();
+
+    await screen.findByLabelText("内容");
+    fireEvent.click(screen.getByRole("button", { name: /^削除$/ }));
+    expect(screen.getByRole("heading", { name: "費目を削除しますか？" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "削除する" }));
+
+    await waitFor(() => {
+      expect(deleteExpense).toHaveBeenCalledWith(sampleGroup.id, sampleExpenses[0].id);
+    });
+  });
 });

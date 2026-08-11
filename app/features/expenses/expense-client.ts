@@ -7,6 +7,7 @@ export interface ExpenseClient {
   get(groupId: Id, expenseId: Id): Promise<Expense | null>;
   create(groupId: Id, input: ExpenseInput): Promise<Expense>;
   update(groupId: Id, expenseId: Id, input: ExpenseInput): Promise<Expense>;
+  delete(groupId: Id, expenseId: Id): Promise<void>;
 }
 
 function cloneExpense(expense: Expense): Expense {
@@ -79,6 +80,16 @@ export function createMockExpenseClient(
       expenses[index] = updatedExpense;
 
       return cloneExpense(updatedExpense);
+    },
+    async delete(groupId, expenseId) {
+      const expenses = expensesByGroup.get(groupId) ?? [];
+      const index = expenses.findIndex((expense) => expense.id === expenseId);
+
+      if (index === -1) {
+        throw new Error("費目が見つかりません。");
+      }
+
+      expenses.splice(index, 1);
     },
   };
 }
