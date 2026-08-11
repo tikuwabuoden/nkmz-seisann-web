@@ -4,8 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Participant } from "@/domain/types";
 
-import { calculateExpenseAllocation } from "./expense-allocation";
-import { parseExpenseAmount, parseWeightHundredths, type ExpenseFormValues } from "./expense-form";
+import type { ExpenseFormValues } from "./expense-form";
 
 interface ExpenseFormFieldsProps {
   form: ExpenseFormValues;
@@ -17,7 +16,6 @@ export function ExpenseFormFields({ form, participants, onChange }: ExpenseFormF
   const payerOptions = participants.filter(
     (participant) => participant.active || participant.id === form.payers[0]?.participantId,
   );
-  const allocations = calculatePreviewAllocations(form, participants);
 
   return (
     <>
@@ -87,7 +85,6 @@ export function ExpenseFormFields({ form, participants, onChange }: ExpenseFormF
             <TableRow>
               <TableHead>参加者</TableHead>
               <TableHead>重み</TableHead>
-              <TableHead className="text-right">分担額</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -110,11 +107,6 @@ export function ExpenseFormFields({ form, participants, onChange }: ExpenseFormF
                     }
                   />
                 </TableCell>
-                <TableCell noWrap className="text-right tabular-nums">
-                  {allocations?.get(share.participantId) === undefined
-                    ? "-"
-                    : formatJpy(allocations.get(share.participantId)!)}
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -122,34 +114,4 @@ export function ExpenseFormFields({ form, participants, onChange }: ExpenseFormF
       </section>
     </>
   );
-}
-
-function calculatePreviewAllocations(form: ExpenseFormValues, participants: Participant[]): Map<string, number> | null {
-  const amount = parseExpenseAmount(form.amount);
-  const payerId = form.payers[0]?.participantId;
-  const shares = form.shares.map((share) => ({
-    participantId: share.participantId,
-    weight: parseWeightHundredths(share.weight),
-  }));
-
-  if (amount === null || !payerId || shares.some((share) => share.weight === null)) {
-    return null;
-  }
-
-  try {
-    return new Map(
-      calculateExpenseAllocation({
-        amount,
-        payerId,
-        participants,
-        shares: shares.map((share) => ({ ...share, weight: share.weight! })),
-      }).map((allocation) => [allocation.participantId, allocation.allocatedAmount]),
-    );
-  } catch {
-    return null;
-  }
-}
-
-function formatJpy(amount: number) {
-  return `¥${amount.toLocaleString("ja-JP")}`;
 }
