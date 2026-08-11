@@ -36,24 +36,24 @@ export interface ExpenseGroup {
   participants: Participant[];
 }
 
-export interface PaymentShare {
+export interface ExpensePayer {
   participantId: Id;
   amount: Jpy;
 }
 
-export interface BurdenShare {
+export interface ExpenseShare {
   participantId: Id;
-  weight: WeightHundredths;
+  weight: number;
+  allocatedAmount: Jpy;
 }
 
 export interface Expense {
   id: Id;
-  groupId: Id;
   description: string;
   amount: Jpy;
-  memo: string | null;
-  paidBy: PaymentShare[];
-  burdenShares: BurdenShare[];
+  note: string | null;
+  payers: ExpensePayer[];
+  shares: ExpenseShare[];
   createdAt: string;
   updatedAt: string;
 }

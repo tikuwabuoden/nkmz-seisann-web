@@ -1,5 +1,5 @@
 import type { Expense, Id } from "@/domain/types";
-import { sampleExpenses } from "@/domain/test-data";
+import { sampleExpenses, sampleGroup } from "@/domain/test-data";
 
 export interface ExpenseClient {
   list(groupId: Id): Promise<Expense[]>;
@@ -8,18 +8,25 @@ export interface ExpenseClient {
 function cloneExpense(expense: Expense): Expense {
   return {
     ...expense,
-    burdenShares: expense.burdenShares.map((share) => ({ ...share })),
-    paidBy: expense.paidBy.map((share) => ({ ...share })),
+    payers: expense.payers.map((payer) => ({ ...payer })),
+    shares: expense.shares.map((share) => ({ ...share })),
   };
 }
 
 /** #28 で実 API クライアントに差し替えるまで使用する費目取得のモック。 */
-export function createMockExpenseClient(initialExpenses: Expense[] = sampleExpenses): ExpenseClient {
-  const expenses = initialExpenses.map((expense) => cloneExpense(expense));
+export function createMockExpenseClient(
+  initialExpensesByGroup: Record<Id, Expense[]> = { [sampleGroup.id]: sampleExpenses },
+): ExpenseClient {
+  const expensesByGroup = new Map(
+    Object.entries(initialExpensesByGroup).map(([groupId, expenses]) => [
+      groupId,
+      expenses.map((expense) => cloneExpense(expense)),
+    ]),
+  );
 
   return {
     async list(groupId) {
-      return expenses.filter((expense) => expense.groupId === groupId).map((expense) => cloneExpense(expense));
+      return (expensesByGroup.get(groupId) ?? []).map((expense) => cloneExpense(expense));
     },
   };
 }
