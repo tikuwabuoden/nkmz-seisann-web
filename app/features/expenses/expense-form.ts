@@ -62,10 +62,10 @@ export function validateExpenseForm(values: ExpenseFormValues): ExpenseFormValid
   const errors: string[] = [];
   const description = values.description.trim();
   const note = values.note.trim();
-  const amount = parseAmount(values.amount);
+  const amount = parseExpenseAmount(values.amount);
   const payers = values.payers.map((payer) => ({
     participantId: payer.participantId,
-    amount: parseAmount(payer.amount),
+    amount: parseExpenseAmount(payer.amount),
   }));
   const shares = values.shares.map((share) => ({
     participantId: share.participantId,
@@ -120,7 +120,7 @@ export function validateExpenseForm(values: ExpenseFormValues): ExpenseFormValid
   };
 }
 
-function parseAmount(value: string): number | null {
+export function parseExpenseAmount(value: string): number | null {
   const normalized = value.trim();
 
   if (!/^\d+$/.test(normalized)) {
@@ -133,6 +133,12 @@ function parseAmount(value: string): number | null {
 }
 
 function parseWeight(value: string): number | null {
+  const hundredths = parseWeightHundredths(value);
+
+  return hundredths === null ? null : hundredths / 100;
+}
+
+export function parseWeightHundredths(value: string): number | null {
   const normalized = value.trim();
 
   if (!/^\d+(?:\.\d{1,2})?$/.test(normalized)) {
@@ -142,7 +148,7 @@ function parseWeight(value: string): number | null {
   const [integer, decimal = ""] = normalized.split(".");
   const units = Number(`${integer}${decimal.padEnd(2, "0")}`);
 
-  return Number.isSafeInteger(units) ? units / 100 : null;
+  return Number.isSafeInteger(units) ? units : null;
 }
 
 function hasDuplicateParticipant(items: Array<{ participantId: Id }>): boolean {
