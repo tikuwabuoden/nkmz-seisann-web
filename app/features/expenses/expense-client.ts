@@ -1,8 +1,10 @@
 import type { Expense, Id } from "@/domain/types";
 import { sampleExpenses, sampleGroup } from "@/domain/test-data";
+import type { ExpenseInput } from "./expense-form";
 
 export interface ExpenseClient {
   list(groupId: Id): Promise<Expense[]>;
+  create(groupId: Id, input: ExpenseInput): Promise<Expense>;
 }
 
 function cloneExpense(expense: Expense): Expense {
@@ -23,10 +25,30 @@ export function createMockExpenseClient(
       expenses.map((expense) => cloneExpense(expense)),
     ]),
   );
+  let nextExpenseNumber = 1;
 
   return {
     async list(groupId) {
       return (expensesByGroup.get(groupId) ?? []).map((expense) => cloneExpense(expense));
+    },
+    async create(groupId, input) {
+      const now = new Date().toISOString();
+      const expense: Expense = {
+        id: `mock-expense-${nextExpenseNumber++}`,
+        description: input.description,
+        amount: input.amount,
+        note: input.note,
+        payers: input.payers.map((payer) => ({ ...payer })),
+        shares: input.shares.map((share) => ({ ...share, allocatedAmount: 0 })),
+        createdAt: now,
+        updatedAt: now,
+      };
+      const expenses = expensesByGroup.get(groupId) ?? [];
+
+      expenses.push(expense);
+      expensesByGroup.set(groupId, expenses);
+
+      return cloneExpense(expense);
     },
   };
 }
