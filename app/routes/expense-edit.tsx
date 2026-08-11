@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type SubmitEvent } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { Navigate, useParams } from 'react-router';
 
 import { AppFixedActionArea } from '@/components/layout/app-fixed-action-area';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import {
 import type { Expense, Participant } from '@/domain/types';
 import { expenseClient } from '@/features/expenses/expense-client';
 import { ExpenseFormFields } from '@/features/expenses/expense-form-fields';
+import { useDiscardConfirmation } from '@/features/expenses/use-discard-confirmation';
 import {
 	createExpenseEditForm,
 	validateExpenseForm,
@@ -74,18 +75,20 @@ interface ExpenseEditFormProps {
 }
 
 function ExpenseEditForm({ expense, groupId, participants }: ExpenseEditFormProps) {
-	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const [form, setForm] = useState<ExpenseFormValues>(() => createExpenseEditForm(expense));
+	const [initialForm] = useState<ExpenseFormValues>(() => createExpenseEditForm(expense));
+	const [form, setForm] = useState<ExpenseFormValues>(initialForm);
 	const [errors, setErrors] = useState<string[]>([]);
+	const [hasFinished, setHasFinished] = useState(false);
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+	const discardConfirmation = useDiscardConfirmation(!hasFinished && JSON.stringify(form) !== JSON.stringify(initialForm));
 	const updateExpense = useMutation({
 		mutationFn: (input: NonNullable<ReturnType<typeof validateExpenseForm>['input']>) =>
 			expenseClient.update(groupId, expense.id, input),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: queryKeys.expenses(groupId) });
 			await queryClient.invalidateQueries({ queryKey: queryKeys.expense(groupId, expense.id) });
-			navigate(`/groups/${groupId}`);
+			setHasFinished(true);
 		},
 	});
 	const deleteExpense = useMutation({
@@ -93,7 +96,7 @@ function ExpenseEditForm({ expense, groupId, participants }: ExpenseEditFormProp
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: queryKeys.expenses(groupId) });
 			await queryClient.invalidateQueries({ queryKey: queryKeys.expense(groupId, expense.id) });
-			navigate(`/groups/${groupId}`);
+			setHasFinished(true);
 		},
 	});
 
@@ -104,6 +107,8 @@ function ExpenseEditForm({ expense, groupId, participants }: ExpenseEditFormProp
 		setErrors(result.errors);
 		if (result.input) updateExpense.mutate(result.input);
 	}
+
+	if (hasFinished) return <Navigate replace to={`/groups/${groupId}`} />;
 
 	return (
 		<main className="p-4 pb-24">
@@ -164,6 +169,7 @@ function ExpenseEditForm({ expense, groupId, participants }: ExpenseEditFormProp
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
+			{discardConfirmation}
 		</main>
 	);
 }

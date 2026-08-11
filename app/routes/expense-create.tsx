@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type SubmitEvent } from "react";
-import { useNavigate, useParams } from "react-router";
+import { Navigate, useParams } from "react-router";
 
 import { AppFixedActionArea } from "@/components/layout/app-fixed-action-area";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import type { Participant } from "@/domain/types";
 import { expenseClient } from "@/features/expenses/expense-client";
 import { ExpenseFormFields } from "@/features/expenses/expense-form-fields";
 import { createInitialExpenseForm, validateExpenseForm, type ExpenseFormValues } from "@/features/expenses/expense-form";
+import { useDiscardConfirmation } from "@/features/expenses/use-discard-confirmation";
 import { participantClient } from "@/features/participants/participant-client";
 import { queryKeys } from "@/lib/query-keys";
 
@@ -34,15 +35,17 @@ interface ExpenseCreateFormProps {
 }
 
 function ExpenseCreateForm({ groupId, participants }: ExpenseCreateFormProps) {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [form, setForm] = useState<ExpenseFormValues>(() => createInitialExpenseForm(participants));
+  const [initialForm] = useState<ExpenseFormValues>(() => createInitialExpenseForm(participants));
+  const [form, setForm] = useState<ExpenseFormValues>(initialForm);
   const [errors, setErrors] = useState<string[]>([]);
+  const [isSaved, setIsSaved] = useState(false);
+  const discardConfirmation = useDiscardConfirmation(!isSaved && JSON.stringify(form) !== JSON.stringify(initialForm));
   const createExpense = useMutation({
     mutationFn: (input: NonNullable<ReturnType<typeof validateExpenseForm>["input"]>) => expenseClient.create(groupId, input),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.expenses(groupId) });
-      navigate(`/groups/${groupId}`);
+      setIsSaved(true);
     },
   });
 
@@ -54,6 +57,8 @@ function ExpenseCreateForm({ groupId, participants }: ExpenseCreateFormProps) {
     if (result.input) createExpense.mutate(result.input);
   }
 
+  if (isSaved) return <Navigate replace to={`/groups/${groupId}`} />;
+
   return (
     <main className="p-4 pb-24">
       <h1 className="mb-6 text-3xl font-semibold tracking-tight">費目を追加</h1>
@@ -63,6 +68,7 @@ function ExpenseCreateForm({ groupId, participants }: ExpenseCreateFormProps) {
         {createExpense.isError ? <p role="alert">費目の保存に失敗しました。</p> : null}
       </form>
       <AppFixedActionArea><Button className="w-full" disabled={createExpense.isPending} form="expense-create-form" type="submit">保存する</Button></AppFixedActionArea>
+      {discardConfirmation}
     </main>
   );
 }

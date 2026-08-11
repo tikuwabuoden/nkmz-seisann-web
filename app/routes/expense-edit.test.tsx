@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter, Route, Routes } from "react-router";
+import { createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { sampleExpenses, sampleGroup } from "@/domain/test-data";
+import type { Expense } from "@/domain/types";
 import { expenseClient } from "@/features/expenses/expense-client";
 import { participantClient } from "@/features/participants/participant-client";
 
@@ -14,14 +15,17 @@ function renderExpenseEdit() {
     defaultOptions: { queries: { retry: false } },
   });
 
+  const router = createMemoryRouter(
+    [
+      { element: <ExpenseEdit />, path: "/groups/:groupId/expenses/:expenseId/edit" },
+      { element: <p>支払い一覧</p>, path: "/groups/:groupId" },
+    ],
+    { initialEntries: [`/groups/${sampleGroup.id}/expenses/${sampleExpenses[0].id}/edit`] },
+  );
+
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[`/groups/${sampleGroup.id}/expenses/${sampleExpenses[0].id}/edit`]}>
-        <Routes>
-          <Route element={<ExpenseEdit />} path="/groups/:groupId/expenses/:expenseId/edit" />
-          <Route element={<p>支払い一覧</p>} path="/groups/:groupId" />
-        </Routes>
-      </MemoryRouter>
+      <RouterProvider router={router} />
     </QueryClientProvider>,
   );
 }
@@ -34,7 +38,7 @@ describe("費目編集画面", () => {
   it("既存の費目を表示し、変更を保存できる", async () => {
     vi.spyOn(participantClient, "list").mockResolvedValue(sampleGroup.participants);
     vi.spyOn(expenseClient, "get").mockResolvedValue(sampleExpenses[0]);
-    const update = vi.spyOn(expenseClient, "update").mockResolvedValue(sampleExpenses[0]);
+    const update = vi.spyOn(expenseClient, "update").mockReturnValue(new Promise<Expense>(() => {}));
 
     renderExpenseEdit();
 
@@ -54,7 +58,7 @@ describe("費目編集画面", () => {
   it("削除確認後に費目を削除できる", async () => {
     vi.spyOn(participantClient, "list").mockResolvedValue(sampleGroup.participants);
     vi.spyOn(expenseClient, "get").mockResolvedValue(sampleExpenses[0]);
-    const deleteExpense = vi.spyOn(expenseClient, "delete").mockResolvedValue();
+    const deleteExpense = vi.spyOn(expenseClient, "delete").mockReturnValue(new Promise<void>(() => {}));
 
     renderExpenseEdit();
 
