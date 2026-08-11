@@ -3,7 +3,7 @@ import { emptySettlement, sampleExpenses, sampleGroup, sampleSettlement } from "
 describe("ドメインの固定データ", () => {
   it("各費目の立替額合計が整数円の総額と一致する", () => {
     for (const expense of sampleExpenses) {
-      const paidTotal = expense.paidBy.reduce((total, payment) => total + payment.amount, 0);
+      const paidTotal = expense.payers.reduce((total, payer) => total + payer.amount, 0);
 
       expect(paidTotal).toBe(expense.amount);
     }
@@ -13,10 +13,10 @@ describe("ドメインの固定データ", () => {
     expect(sampleGroup.participants).toContainEqual(
       expect.objectContaining({ active: false }),
     );
-    expect(sampleExpenses.flatMap((expense) => expense.burdenShares)).toEqual(
+    expect(sampleExpenses.flatMap((expense) => expense.shares)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ weight: 0 }),
-        expect.objectContaining({ weight: 125 }),
+        expect.objectContaining({ weight: 1.25 }),
       ]),
     );
   });

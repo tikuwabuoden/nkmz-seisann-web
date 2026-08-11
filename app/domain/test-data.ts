@@ -27,48 +27,45 @@ export const sampleGroup: ExpenseGroup = {
 export const sampleExpenses: Expense[] = [
   {
     id: "expense-rail",
-    groupId: sampleGroup.id,
     description: "新幹線代",
     amount: 4_800,
-    memo: null,
-    paidBy: [{ participantId: "participant-alice", amount: 4_800 }],
-    burdenShares: [
-      { participantId: "participant-alice", weight: 100 },
-      { participantId: "participant-bob", weight: 100 },
-      { participantId: "participant-carol", weight: 100 },
+    note: null,
+    payers: [{ participantId: "participant-alice", amount: 4_800 }],
+    shares: [
+      { participantId: "participant-alice", weight: 1, allocatedAmount: 1_600 },
+      { participantId: "participant-bob", weight: 1, allocatedAmount: 1_600 },
+      { participantId: "participant-carol", weight: 1, allocatedAmount: 1_600 },
     ],
     createdAt: "2026-07-01T10:00:00Z",
     updatedAt: "2026-07-01T10:00:00Z",
   },
   {
     id: "expense-hotel",
-    groupId: sampleGroup.id,
     description: "宿泊費",
     amount: 9_000,
-    memo: "Two payers",
-    paidBy: [
+    note: "2人で立替",
+    payers: [
       { participantId: "participant-bob", amount: 4_000 },
       { participantId: "participant-carol", amount: 5_000 },
     ],
-    burdenShares: [
-      { participantId: "participant-alice", weight: 100 },
-      { participantId: "participant-bob", weight: 150 },
-      { participantId: "participant-carol", weight: 75 },
+    shares: [
+      { participantId: "participant-alice", weight: 1, allocatedAmount: 2_770 },
+      { participantId: "participant-bob", weight: 1.5, allocatedAmount: 4_154 },
+      { participantId: "participant-carol", weight: 0.75, allocatedAmount: 2_076 },
     ],
     createdAt: "2026-07-02T14:00:00Z",
     updatedAt: "2026-07-02T14:00:00Z",
   },
   {
     id: "expense-snacks",
-    groupId: sampleGroup.id,
     description: "お菓子代",
     amount: 1_000,
-    memo: "Includes a zero weight",
-    paidBy: [{ participantId: "participant-alice", amount: 1_000 }],
-    burdenShares: [
-      { participantId: "participant-alice", weight: 125 },
-      { participantId: "participant-bob", weight: 0 },
-      { participantId: "participant-carol", weight: 50 },
+    note: "重み0の参加者を含む",
+    payers: [{ participantId: "participant-alice", amount: 1_000 }],
+    shares: [
+      { participantId: "participant-alice", weight: 1.25, allocatedAmount: 714 },
+      { participantId: "participant-bob", weight: 0, allocatedAmount: 0 },
+      { participantId: "participant-carol", weight: 0.5, allocatedAmount: 286 },
     ],
     createdAt: "2026-07-03T11:00:00Z",
     updatedAt: "2026-07-03T11:00:00Z",
