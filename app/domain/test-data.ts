@@ -73,13 +73,11 @@ export const sampleExpenses: Expense[] = [
 ];
 
 export const sampleSettlement: Settlement = {
-  groupId: sampleGroup.id,
-  calculatedAt: "2026-07-03T12:00:00Z",
-  participantSummaries: [
-    { participantId: "participant-alice", paidAmount: 5_800, burdenAmount: 5_036, balance: 764 },
-    { participantId: "participant-bob", paidAmount: 4_000, burdenAmount: 5_754, balance: -1_754 },
-    { participantId: "participant-carol", paidAmount: 5_000, burdenAmount: 4_010, balance: 990 },
-    { participantId: "participant-dave", paidAmount: 0, burdenAmount: 0, balance: 0 },
+  participants: [
+    { ...sampleGroup.participants[0]!, paidAmount: 5_800, owedAmount: 5_036, balance: 764 },
+    { ...sampleGroup.participants[1]!, paidAmount: 4_000, owedAmount: 5_754, balance: -1_754 },
+    { ...sampleGroup.participants[2]!, paidAmount: 5_000, owedAmount: 4_010, balance: 990 },
+    { ...sampleGroup.participants[3]!, paidAmount: 0, owedAmount: 0, balance: 0 },
   ],
   transfers: [
     { fromParticipantId: "participant-bob", toParticipantId: "participant-alice", amount: 764 },
@@ -99,10 +97,8 @@ export const emptyGroup: ExpenseGroup = {
 };
 
 export const emptySettlement: Settlement = {
-  groupId: emptyGroup.id,
-  calculatedAt: null,
-  participantSummaries: [
-    { participantId: "participant-alice-empty", paidAmount: 0, burdenAmount: 0, balance: 0 },
+  participants: [
+    { ...emptyGroup.participants[0]!, paidAmount: 0, owedAmount: 0, balance: 0 },
   ],
   transfers: [],
 };
