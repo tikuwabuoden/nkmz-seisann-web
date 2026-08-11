@@ -10,4 +10,28 @@ describe("費目のモッククライアント", () => {
 
     await expect(client.list(sampleGroup.id)).resolves.toEqual([sampleExpenses[0]]);
   });
+
+  it("費目を更新し、更新後の値を取得できる", async () => {
+    const client = createMockExpenseClient({ [sampleGroup.id]: [sampleExpenses[0]] });
+    const input = {
+      description: "更新後の費目",
+      amount: 12_000,
+      note: null,
+      payers: [{ participantId: sampleExpenses[0].payers[0].participantId, amount: 12_000 }],
+      shares: sampleExpenses[0].shares.map((share) => ({
+        participantId: share.participantId,
+        weight: share.weight,
+      })),
+    };
+
+    await expect(client.update(sampleGroup.id, sampleExpenses[0].id, input)).resolves.toMatchObject({
+      description: "更新後の費目",
+      amount: 12_000,
+      note: null,
+    });
+    await expect(client.get(sampleGroup.id, sampleExpenses[0].id)).resolves.toMatchObject({
+      description: "更新後の費目",
+      amount: 12_000,
+    });
+  });
 });

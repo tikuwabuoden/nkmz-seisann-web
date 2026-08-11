@@ -1,4 +1,4 @@
-import type { Id, Participant } from "@/domain/types";
+import type { Expense, Id, Participant } from "@/domain/types";
 
 export interface ExpenseFormPayer {
   participantId: Id;
@@ -40,6 +40,21 @@ export function createInitialExpenseForm(participants: Participant[]): ExpenseFo
     note: "",
     payers: activeParticipants[0] ? [{ participantId: activeParticipants[0].id, amount: "" }] : [],
     shares: activeParticipants.map((participant) => ({ participantId: participant.id, weight: "1" })),
+  };
+}
+
+export function createExpenseEditForm(expense: Expense): ExpenseFormValues {
+  const payer = expense.payers[0];
+
+  return {
+    description: expense.description,
+    amount: String(expense.amount),
+    note: expense.note ?? "",
+    payers: payer ? [{ participantId: payer.participantId, amount: String(expense.amount) }] : [],
+    shares: expense.shares.map((share) => ({
+      participantId: share.participantId,
+      weight: String(share.weight),
+    })),
   };
 }
 
