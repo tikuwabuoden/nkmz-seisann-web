@@ -1,6 +1,7 @@
 import type { Id, Settlement } from "@/domain/types";
 import { emptyGroup, emptySettlement, sampleGroup, sampleSettlement } from "@/domain/test-data";
 import { ApiError } from "@/lib/api-client";
+import { apiUrl, createApiClient, type ApiClient } from "@/lib/api-client";
 
 export interface SettlementClient {
   get(groupId: Id): Promise<Settlement>;
@@ -11,6 +12,17 @@ function cloneSettlement(settlement: Settlement): Settlement {
     ...settlement,
     participants: settlement.participants.map((participant) => ({ ...participant })),
     transfers: settlement.transfers.map((transfer) => ({ ...transfer })),
+  };
+}
+
+/** nkmz API を使う精算結果クライアントを作成する。 */
+export function createNkmzSettlementClient(client: ApiClient = createApiClient()): SettlementClient {
+  return {
+    async get(groupId) {
+      const settlement = await client.request<Settlement>(apiUrl(`/expense-groups/${groupId}/settlement`));
+      if (!settlement) throw new Error("精算結果の応答が空です。");
+      return settlement;
+    },
   };
 }
 
@@ -38,4 +50,4 @@ export function createMockSettlementClient(
   };
 }
 
-export const settlementClient = createMockSettlementClient();
+export const settlementClient = createNkmzSettlementClient();

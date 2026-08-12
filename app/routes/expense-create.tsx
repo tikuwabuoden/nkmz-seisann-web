@@ -45,6 +45,7 @@ function ExpenseCreateForm({ groupId, participants }: ExpenseCreateFormProps) {
     mutationFn: (input: NonNullable<ReturnType<typeof validateExpenseForm>["input"]>) => expenseClient.create(groupId, input),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.expenses(groupId) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.settlement(groupId) });
       setIsSaved(true);
     },
   });

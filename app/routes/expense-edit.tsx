@@ -88,6 +88,7 @@ function ExpenseEditForm({ expense, groupId, participants }: ExpenseEditFormProp
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: queryKeys.expenses(groupId) });
 			await queryClient.invalidateQueries({ queryKey: queryKeys.expense(groupId, expense.id) });
+			await queryClient.invalidateQueries({ queryKey: queryKeys.settlement(groupId) });
 			setHasFinished(true);
 		},
 	});
@@ -96,6 +97,7 @@ function ExpenseEditForm({ expense, groupId, participants }: ExpenseEditFormProp
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: queryKeys.expenses(groupId) });
 			await queryClient.invalidateQueries({ queryKey: queryKeys.expense(groupId, expense.id) });
+			await queryClient.invalidateQueries({ queryKey: queryKeys.settlement(groupId) });
 			setHasFinished(true);
 		},
 	});
