@@ -1,5 +1,6 @@
 import { sampleGroup, users } from "@/domain/test-data";
 import type { Id, NkmzUser, Participant } from "@/domain/types";
+import { apiUrl, createApiClient, type ApiClient } from "@/lib/api-client";
 
 export interface ParticipantClient {
   list(groupId: Id): Promise<Participant[]>;
@@ -13,7 +14,45 @@ function cloneParticipant(participant: Participant): Participant {
   return { ...participant };
 }
 
-/** #28 で実 API クライアントに差し替えるまで使用する参加者のモッククライアント。 */
+interface UserSearchResponse {
+  items: NkmzUser[];
+}
+
+/** nkmz API を使う参加者クライアントを作成する。 */
+export function createNkmzParticipantClient(client: ApiClient = createApiClient()): ParticipantClient {
+  return {
+    async list(groupId) {
+      const participants = await client.request<Participant[]>(apiUrl(`/expense-groups/${groupId}/participants`));
+      if (!participants) throw new Error("参加者一覧の応答が空です。");
+      return participants;
+    },
+    async searchUsers(query) {
+      const users = await client.request<UserSearchResponse>(apiUrl(`/users/search?query=${encodeURIComponent(query.trim())}`));
+      if (!users) throw new Error("ユーザー検索の応答が空です。");
+      return users.items;
+    },
+    async add(groupId, userId) {
+      const participant = await client.request<Participant>(apiUrl(`/expense-groups/${groupId}/participants`), {
+        body: { userId },
+        method: "POST",
+      });
+      if (!participant) throw new Error("参加者追加の応答が空です。");
+      return participant;
+    },
+    async activate(groupId, participantId) {
+      const participant = await client.request<Participant>(apiUrl(`/expense-groups/${groupId}/participants/${participantId}/activate`), { method: "POST" });
+      if (!participant) throw new Error("参加者有効化の応答が空です。");
+      return participant;
+    },
+    async deactivate(groupId, participantId) {
+      const participant = await client.request<Participant>(apiUrl(`/expense-groups/${groupId}/participants/${participantId}/deactivate`), { method: "POST" });
+      if (!participant) throw new Error("参加者無効化の応答が空です。");
+      return participant;
+    },
+  };
+}
+
+/** 画面テスト用のモッククライアントを作成する。 */
 export function createMockParticipantClient(
   initialParticipants: Record<Id, Participant[]> = { [sampleGroup.id]: sampleGroup.participants },
   initialUsers: NkmzUser[] = Object.values(users),
@@ -96,4 +135,4 @@ export function createMockParticipantClient(
   }
 }
 
-export const participantClient = createMockParticipantClient();
+export const participantClient = createNkmzParticipantClient();
