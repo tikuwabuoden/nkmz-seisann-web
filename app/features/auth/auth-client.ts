@@ -1,15 +1,9 @@
 import type { NkmzUser } from "@/domain/types";
-import { ApiError, createApiClient, type ApiClient } from "@/lib/api-client";
+import { apiUrl, ApiError, createApiClient, type ApiClient } from "@/lib/api-client";
 
 export interface AuthClient {
   getCurrentUser(): Promise<NkmzUser | null>;
   startDiscordLogin(redirectTo: string): void;
-}
-
-function apiUrl(path: string): string {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL;
-
-  return baseUrl ? new URL(path, baseUrl).toString() : path;
 }
 
 export function createAuthClient(
