@@ -15,6 +15,9 @@ import {
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { expenseClient } from '@/features/expenses/expense-client';
+import { authClient } from '@/features/auth/auth-client';
+import { SettlementResults } from '@/features/settlement/settlement-results';
+import { settlementClient } from '@/features/settlement/settlement-client';
 import { queryKeys } from '@/lib/query-keys';
 
 function formatJpy(amount: number) {
@@ -30,6 +33,14 @@ export default function GroupDetail() {
 	const { data: expenses = [], isError, isPending } = useQuery({
 		queryKey: queryKeys.expenses(groupId),
 		queryFn: () => expenseClient.list(groupId),
+	});
+	const settlementQuery = useQuery({
+		queryKey: queryKeys.settlement(groupId),
+		queryFn: () => settlementClient.get(groupId),
+	});
+	const currentUserQuery = useQuery({
+		queryKey: queryKeys.auth,
+		queryFn: () => authClient.getCurrentUser(),
 	});
 	const totalAmount = expenses.reduce((total, expense) => total + expense.amount, 0);
 
@@ -95,7 +106,17 @@ export default function GroupDetail() {
 						</Table>
 					)}
 				</TabsContent>
-				<TabsContent value="settlement" />
+				<TabsContent value="settlement" className="pt-4">
+					{settlementQuery.isPending || currentUserQuery.isPending ? (
+						<p role="status">精算結果を読み込んでいます。</p>
+					) : settlementQuery.isError || currentUserQuery.isError ? (
+						<p role="alert">精算結果の取得に失敗しました。</p>
+					) : currentUserQuery.data === null ? (
+						<p role="alert">ログインが必要です。</p>
+					) : (
+						<SettlementResults currentUserId={currentUserQuery.data.id} settlement={settlementQuery.data} />
+					)}
+				</TabsContent>
 			</Tabs>
 			<AppFixedActionArea>
 				<Button asChild className="w-full">

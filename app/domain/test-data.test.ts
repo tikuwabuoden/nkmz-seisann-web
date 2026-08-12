@@ -22,7 +22,7 @@ describe("ドメインの固定データ", () => {
   });
 
   it("精算差額と送金案の合計が整合する", () => {
-    const balances = sampleSettlement.participantSummaries.reduce(
+    const balances = sampleSettlement.participants.reduce(
       (total, participant) => total + participant.balance,
       0,
     );
@@ -35,7 +35,8 @@ describe("ドメインの固定データ", () => {
     expect(transferTotal).toBe(1_754);
   });
 
-  it("費目がない場合は精算計算日時を持たない", () => {
-    expect(emptySettlement.calculatedAt).toBeNull();
+  it("費目がない場合は送金案を持たない", () => {
+    expect(emptySettlement.transfers).toEqual([]);
+    expect(emptySettlement.participants[0]).toMatchObject({ paidAmount: 0, owedAmount: 0, balance: 0 });
   });
 });

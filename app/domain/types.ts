@@ -58,10 +58,10 @@ export interface Expense {
   updatedAt: string;
 }
 
-export interface ParticipantSettlement {
-  participantId: Id;
+/** BEのExpenseGroupSettlement.participantsに対応する参加者別集計。 */
+export interface SettlementParticipant extends Participant {
   paidAmount: Jpy;
-  burdenAmount: Jpy;
+  owedAmount: Jpy;
   balance: Jpy;
 }
 
@@ -72,8 +72,6 @@ export interface Transfer {
 }
 
 export interface Settlement {
-  groupId: Id;
-  calculatedAt: string | null;
-  participantSummaries: ParticipantSettlement[];
+  participants: SettlementParticipant[];
   transfers: Transfer[];
 }
