@@ -57,6 +57,14 @@ describe("精算グループ作成画面", () => {
   });
 
   it("作成後にグループ一覧へ反映する", async () => {
+    const createdGroup = {
+      expenseCount: 0,
+      id: "mock-group-1",
+      name: "作成後に一覧へ反映されるグループ",
+      participantCount: 1,
+    };
+    vi.spyOn(groupClient, "create").mockResolvedValue(createdGroup);
+    vi.spyOn(groupClient, "list").mockResolvedValue([createdGroup]);
     const queryClient = createQueryClient();
 
     render(

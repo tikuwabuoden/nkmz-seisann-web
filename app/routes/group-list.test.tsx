@@ -1,12 +1,16 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
+import { afterEach, vi } from "vitest";
 
+import { groupClient } from "@/features/groups/group-client";
+import { groupListItems } from "@/features/groups/group-list-data";
 import { createQueryClient } from "@/lib/query-client";
 
 import GroupList from "./group-list";
 
 function renderGroupList() {
+  vi.spyOn(groupClient, "list").mockResolvedValue(groupListItems);
   const queryClient = createQueryClient();
 
   return render(
@@ -19,6 +23,10 @@ function renderGroupList() {
 }
 
 describe("精算グループ一覧画面", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("グループ名、参加者数、費目数を表示する", async () => {
     renderGroupList();
 

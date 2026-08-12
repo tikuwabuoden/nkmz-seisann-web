@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AppFixedActionArea } from "@/components/layout/app-fixed-action-area";
 import { Button } from "@/components/ui/button";
 import { groupClient } from "@/features/groups/group-client";
+import { getApiErrorMessage } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
 import {
   Table,
@@ -20,7 +21,7 @@ export function meta() {
 }
 
 export default function GroupList() {
-  const { data: groups = [] } = useQuery({
+  const { data: groups = [], error, isError, isPending } = useQuery({
     queryKey: queryKeys.groups,
     queryFn: () => groupClient.list(),
   });
@@ -28,6 +29,8 @@ export default function GroupList() {
   return (
     <main className="p-4 pb-24">
       <h1 className="mb-6 text-3xl font-semibold tracking-tight">精算グループ</h1>
+      {isPending ? <p role="status">グループを読み込んでいます。</p> : null}
+      {isError ? <p role="alert">{getApiErrorMessage(error)}</p> : null}
       <Table aria-label="精算グループ一覧">
         <TableHeader>
           <TableRow>
@@ -40,7 +43,7 @@ export default function GroupList() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {groups.map((group) => (
+          {!isPending && !isError ? groups.map((group) => (
             <TableRow key={group.id}>
               <TableCell className="font-medium">{group.name}</TableCell>
               <TableCell noWrap className="text-center">
@@ -59,7 +62,7 @@ export default function GroupList() {
                 </Link>
               </TableCell>
             </TableRow>
-          ))}
+          )) : null}
         </TableBody>
       </Table>
       <AppFixedActionArea>
