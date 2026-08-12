@@ -24,6 +24,7 @@ import {
 } from '@/features/expenses/expense-form';
 import { participantClient } from '@/features/participants/participant-client';
 import { queryKeys } from '@/lib/query-keys';
+import { getApiErrorMessage } from '@/lib/api-client';
 
 export function meta() {
 	return [{ title: '費目を編集 | nkmz 精算' }];
@@ -49,7 +50,7 @@ export default function ExpenseEdit() {
 	if (participantsQuery.isError || expenseQuery.isError)
 		return (
 			<main className="p-4">
-				<p role="alert">費目の取得に失敗しました。</p>
+				<p role="alert">{getApiErrorMessage(participantsQuery.error ?? expenseQuery.error)}</p>
 			</main>
 		);
 	if (!expenseQuery.data)
@@ -124,7 +125,7 @@ function ExpenseEditForm({ expense, groupId, participants }: ExpenseEditFormProp
 						))}
 					</ul>
 				) : null}
-				{updateExpense.isError ? <p role="alert">費目の保存に失敗しました。</p> : null}
+				{updateExpense.isError ? <p role="alert">{getApiErrorMessage(updateExpense.error)}</p> : null}
 			</form>
 			<AppFixedActionArea>
 				<Button
@@ -153,7 +154,7 @@ function ExpenseEditForm({ expense, groupId, participants }: ExpenseEditFormProp
 							削除した費目は元に戻せません。
 						</DialogDescription>
 					</DialogHeader>
-					{deleteExpense.isError ? <p role="alert">費目の削除に失敗しました。</p> : null}
+					{deleteExpense.isError ? <p role="alert">{getApiErrorMessage(deleteExpense.error)}</p> : null}
 					<DialogFooter>
 						<DialogClose asChild>
 							<Button disabled={deleteExpense.isPending} type="button" variant="outline">

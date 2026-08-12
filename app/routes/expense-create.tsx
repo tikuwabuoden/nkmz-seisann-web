@@ -10,6 +10,7 @@ import { ExpenseFormFields } from "@/features/expenses/expense-form-fields";
 import { createInitialExpenseForm, validateExpenseForm, type ExpenseFormValues } from "@/features/expenses/expense-form";
 import { useDiscardConfirmation } from "@/features/expenses/use-discard-confirmation";
 import { participantClient } from "@/features/participants/participant-client";
+import { getApiErrorMessage } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
 
 export function meta() {
@@ -24,7 +25,7 @@ export default function ExpenseCreate() {
   });
 
   if (participantsQuery.isPending) return <main className="p-4"><p role="status">参加者を読み込んでいます。</p></main>;
-  if (participantsQuery.isError) return <main className="p-4"><p role="alert">参加者の取得に失敗しました。</p></main>;
+  if (participantsQuery.isError) return <main className="p-4"><p role="alert">{getApiErrorMessage(participantsQuery.error)}</p></main>;
 
   return <ExpenseCreateForm groupId={groupId} participants={participantsQuery.data} />;
 }
@@ -66,7 +67,7 @@ function ExpenseCreateForm({ groupId, participants }: ExpenseCreateFormProps) {
       <form className="space-y-6" id="expense-create-form" onSubmit={handleSubmit}>
         <ExpenseFormFields form={form} participants={participants} onChange={setForm} />
         {errors.length > 0 ? <ul className="space-y-1 text-sm text-destructive" role="alert">{errors.map((error) => <li key={error}>{error}</li>)}</ul> : null}
-        {createExpense.isError ? <p role="alert">費目の保存に失敗しました。</p> : null}
+        {createExpense.isError ? <p role="alert">{getApiErrorMessage(createExpense.error)}</p> : null}
       </form>
       <AppFixedActionArea><Button className="w-full" disabled={createExpense.isPending} form="expense-create-form" type="submit">保存する</Button></AppFixedActionArea>
       {discardConfirmation}
