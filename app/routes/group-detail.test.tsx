@@ -27,6 +27,14 @@ function renderGroupDetail() {
   );
 }
 
+function openSettlementTab() {
+  const settlementTab = screen.getByRole("tab", { name: "精算結果" });
+
+  fireEvent.pointerDown(settlementTab, { button: 0, ctrlKey: false });
+  fireEvent.mouseDown(settlementTab, { button: 0, ctrlKey: false });
+  fireEvent.click(settlementTab);
+}
+
 describe("支払い一覧画面", () => {
   beforeEach(() => {
     vi.spyOn(authClient, "getCurrentUser").mockResolvedValue(users.alice);
@@ -77,12 +85,32 @@ describe("支払い一覧画面", () => {
     vi.spyOn(authClient, "getCurrentUser").mockResolvedValue(users.dave);
     renderGroupDetail();
 
-    const settlementTab = screen.getByRole("tab", { name: "精算結果" });
-    fireEvent.pointerDown(settlementTab, { button: 0, ctrlKey: false });
-    fireEvent.mouseDown(settlementTab, { button: 0, ctrlKey: false });
-    fireEvent.click(settlementTab);
+    openSettlementTab();
 
     expect(await screen.findByRole("table", { name: "最終送金案" })).toBeInTheDocument();
     expect(screen.getByText("精算不要です。")).toBeInTheDocument();
+  });
+
+  it("精算結果の読み込み中を表示する", async () => {
+    let resolveSettlement: (settlement: typeof sampleSettlement) => void;
+    const pendingSettlement = new Promise<typeof sampleSettlement>((resolve) => {
+      resolveSettlement = resolve;
+    });
+    vi.spyOn(settlementClient, "get").mockReturnValue(pendingSettlement);
+
+    renderGroupDetail();
+    openSettlementTab();
+
+    expect(await screen.findByRole("status")).toHaveTextContent("精算結果を読み込んでいます。");
+    resolveSettlement!(sampleSettlement);
+  });
+
+  it("精算結果の取得失敗を表示する", async () => {
+    vi.spyOn(settlementClient, "get").mockRejectedValue(new Error("通信に失敗しました"));
+
+    renderGroupDetail();
+    openSettlementTab();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("精算結果の取得に失敗しました。");
   });
 });
