@@ -1,10 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Expense } from "@/domain/types";
+import { sampleSettlement, users } from "@/domain/test-data";
+import { authClient } from "@/features/auth/auth-client";
 import { expenseClient } from "@/features/expenses/expense-client";
+import { settlementClient } from "@/features/settlement/settlement-client";
 
 import GroupDetail from "./group-detail";
 
@@ -25,6 +28,11 @@ function renderGroupDetail() {
 }
 
 describe("支払い一覧画面", () => {
+  beforeEach(() => {
+    vi.spyOn(authClient, "getCurrentUser").mockResolvedValue(users.alice);
+    vi.spyOn(settlementClient, "get").mockResolvedValue(sampleSettlement);
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -63,5 +71,18 @@ describe("支払い一覧画面", () => {
     renderGroupDetail();
 
     expect(await screen.findByRole("alert")).toHaveTextContent("支払いの取得に失敗しました。");
+  });
+
+  it("精算結果タブにあなたの精算と最終送金案を表示する", async () => {
+    vi.spyOn(authClient, "getCurrentUser").mockResolvedValue(users.dave);
+    renderGroupDetail();
+
+    const settlementTab = screen.getByRole("tab", { name: "精算結果" });
+    fireEvent.pointerDown(settlementTab, { button: 0, ctrlKey: false });
+    fireEvent.mouseDown(settlementTab, { button: 0, ctrlKey: false });
+    fireEvent.click(settlementTab);
+
+    expect(await screen.findByRole("table", { name: "最終送金案" })).toBeInTheDocument();
+    expect(screen.getByText("精算不要です。")).toBeInTheDocument();
   });
 });
