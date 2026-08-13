@@ -109,23 +109,16 @@ export function createNkmzGroupClient(client: ApiClient = createApiClient()): Gr
   };
 }
 
-/** 画面テスト用のモッククライアントを作成する。 */
+/** 画面テスト用のグループクライアントを作成する。 */
 export function createMockGroupClient(initialGroups: GroupListItem[] = groupListItems): GroupClient {
   const groups = initialGroups.map((group) => ({ ...group }));
   let nextGroupNumber = 1;
-
   return {
     async list() {
       return groups.map((group) => ({ ...group }));
     },
     async create({ name }) {
-      const group = {
-        id: `mock-group-${nextGroupNumber++}`,
-        name,
-        participantCount: 1,
-        expenseCount: 0,
-      };
-
+      const group = { id: `mock-group-${nextGroupNumber++}`, name, participantCount: 1, expenseCount: 0 };
       groups.push(group);
       return { ...group };
     },

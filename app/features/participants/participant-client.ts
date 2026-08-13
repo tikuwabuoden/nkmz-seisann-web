@@ -10,15 +10,14 @@ export interface ParticipantClient {
   deactivate(groupId: Id, participantId: Id): Promise<Participant>;
 }
 
-function cloneParticipant(participant: Participant): Participant {
-  return { ...participant };
-}
-
 interface UserSearchResponse {
   items: NkmzUser[];
 }
 
-/** nkmz API を使う参加者クライアントを作成する。 */
+function cloneParticipant(participant: Participant): Participant {
+  return { ...participant };
+}
+
 export function createNkmzParticipantClient(client: ApiClient = createApiClient()): ParticipantClient {
   return {
     async list(groupId) {
@@ -32,10 +31,7 @@ export function createNkmzParticipantClient(client: ApiClient = createApiClient(
       return users.items;
     },
     async add(groupId, userId) {
-      const participant = await client.request<Participant>(apiUrl(`/expense-groups/${groupId}/participants`), {
-        body: { userId },
-        method: "POST",
-      });
+      const participant = await client.request<Participant>(apiUrl(`/expense-groups/${groupId}/participants`), { body: { userId }, method: "POST" });
       if (!participant) throw new Error("参加者追加の応答が空です。");
       return participant;
     },
@@ -52,7 +48,7 @@ export function createNkmzParticipantClient(client: ApiClient = createApiClient(
   };
 }
 
-/** 画面テスト用のモッククライアントを作成する。 */
+/** 画面テスト用の参加者クライアントを作成する。 */
 export function createMockParticipantClient(
   initialParticipants: Record<Id, Participant[]> = { [sampleGroup.id]: sampleGroup.participants },
   initialUsers: NkmzUser[] = Object.values(users),
@@ -76,7 +72,6 @@ export function createMockParticipantClient(
       if (!normalizedQuery || normalizedQuery.length > 32) {
         throw new Error("検索文字列は1文字以上32文字以内で入力してください。");
       }
-
       return availableUsers
         .filter((user) => user.username.toLocaleLowerCase().includes(normalizedQuery))
         .slice(0, 10)
@@ -84,14 +79,10 @@ export function createMockParticipantClient(
     },
     async add(groupId, userId) {
       const user = availableUsers.find((candidate) => candidate.id === userId);
-      if (!user) {
-        throw new Error("追加するユーザーが見つかりません。");
-      }
+      if (!user) throw new Error("追加するユーザーが見つかりません。");
 
       const participants = participantsByGroup.get(groupId) ?? [];
-      if (participants.length >= 20) {
-        throw new Error("参加者は20人までです。");
-      }
+      if (participants.length >= 20) throw new Error("参加者は20人までです。");
       if (participants.some((participant) => participant.userId === userId)) {
         throw new Error("このユーザーはすでに参加しています。");
       }
@@ -105,7 +96,6 @@ export function createMockParticipantClient(
       };
       participants.push(participant);
       participantsByGroup.set(groupId, participants);
-
       return cloneParticipant(participant);
     },
     async activate(groupId, participantId) {
@@ -117,21 +107,16 @@ export function createMockParticipantClient(
   };
 
   function setActive(groupId: Id, participantId: Id, active: boolean): Participant {
-      const participant = (participantsByGroup.get(groupId) ?? []).find(
-        (candidate) => candidate.id === participantId,
-      );
-      if (!participant) {
-        throw new Error("参加者が見つかりません。");
-      }
-      if (!active && participant.userId === currentUserId) {
-        throw new Error("自分自身を無効化することはできません。");
-      }
-      if (participant.active === active) {
-        throw new Error(active ? "参加者はすでに有効です。" : "参加者はすでに無効です。");
-      }
-
-      participant.active = active;
-      return cloneParticipant(participant);
+    const participant = (participantsByGroup.get(groupId) ?? []).find((candidate) => candidate.id === participantId);
+    if (!participant) throw new Error("参加者が見つかりません。");
+    if (!active && participant.userId === currentUserId) {
+      throw new Error("自分自身を無効化することはできません。");
+    }
+    if (participant.active === active) {
+      throw new Error(active ? "参加者はすでに有効です。" : "参加者はすでに無効です。");
+    }
+    participant.active = active;
+    return cloneParticipant(participant);
   }
 }
 

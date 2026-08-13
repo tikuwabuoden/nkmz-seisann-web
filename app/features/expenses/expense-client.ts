@@ -1,5 +1,5 @@
-import type { Expense, Id } from "@/domain/types";
 import { sampleExpenses, sampleGroup } from "@/domain/test-data";
+import type { Expense, Id } from "@/domain/types";
 import { apiUrl, createApiClient, type ApiClient } from "@/lib/api-client";
 import type { ExpenseInput } from "./expense-form";
 
@@ -11,17 +11,17 @@ export interface ExpenseClient {
   delete(groupId: Id, expenseId: Id): Promise<void>;
 }
 
+interface ExpenseListResponse {
+  items: Expense[];
+  nextCursor: string | null;
+}
+
 function cloneExpense(expense: Expense): Expense {
   return {
     ...expense,
     payers: expense.payers.map((payer) => ({ ...payer })),
     shares: expense.shares.map((share) => ({ ...share })),
   };
-}
-
-interface ExpenseListResponse {
-  items: Expense[];
-  nextCursor: string | null;
 }
 
 function expenseListUrl(groupId: Id, cursor?: string): string {
@@ -31,20 +31,17 @@ function expenseListUrl(groupId: Id, cursor?: string): string {
   return apiUrl(`/expense-groups/${groupId}/expenses?${parameters.toString()}`);
 }
 
-/** nkmz API を使う費目クライアントを作成する。 */
 export function createNkmzExpenseClient(client: ApiClient = createApiClient()): ExpenseClient {
   return {
     async list(groupId) {
       const expenses: Expense[] = [];
       let cursor: string | null = null;
-
       do {
         const response: ExpenseListResponse | undefined = await client.request<ExpenseListResponse>(expenseListUrl(groupId, cursor ?? undefined));
         if (!response) throw new Error("費目一覧の応答が空です。");
         expenses.push(...response.items);
         cursor = response.nextCursor;
       } while (cursor);
-
       return expenses;
     },
     async get(groupId, expenseId) {
@@ -68,7 +65,7 @@ export function createNkmzExpenseClient(client: ApiClient = createApiClient()): 
   };
 }
 
-/** #28 で実 API クライアントに差し替えるまで使用する費目取得のモック。 */
+/** 画面テスト用の費目クライアントを作成する。 */
 export function createMockExpenseClient(
   initialExpensesByGroup: Record<Id, Expense[]> = { [sampleGroup.id]: sampleExpenses },
 ): ExpenseClient {
@@ -86,7 +83,6 @@ export function createMockExpenseClient(
     },
     async get(groupId, expenseId) {
       const expense = (expensesByGroup.get(groupId) ?? []).find((item) => item.id === expenseId);
-
       return expense ? cloneExpense(expense) : null;
     },
     async create(groupId, input) {
@@ -102,23 +98,17 @@ export function createMockExpenseClient(
         updatedAt: now,
       };
       const expenses = expensesByGroup.get(groupId) ?? [];
-
       expenses.push(expense);
       expensesByGroup.set(groupId, expenses);
-
       return cloneExpense(expense);
     },
     async update(groupId, expenseId, input) {
       const expenses = expensesByGroup.get(groupId) ?? [];
       const index = expenses.findIndex((expense) => expense.id === expenseId);
+      if (index === -1) throw new Error("費目が見つかりません。");
 
-      if (index === -1) {
-        throw new Error("費目が見つかりません。");
-      }
-
-      const existingExpense = expenses[index];
       const updatedExpense: Expense = {
-        ...existingExpense,
+        ...expenses[index],
         description: input.description,
         amount: input.amount,
         note: input.note,
@@ -126,19 +116,13 @@ export function createMockExpenseClient(
         shares: input.shares.map((share) => ({ ...share, allocatedAmount: 0 })),
         updatedAt: new Date().toISOString(),
       };
-
       expenses[index] = updatedExpense;
-
       return cloneExpense(updatedExpense);
     },
     async delete(groupId, expenseId) {
       const expenses = expensesByGroup.get(groupId) ?? [];
       const index = expenses.findIndex((expense) => expense.id === expenseId);
-
-      if (index === -1) {
-        throw new Error("費目が見つかりません。");
-      }
-
+      if (index === -1) throw new Error("費目が見つかりません。");
       expenses.splice(index, 1);
     },
   };

@@ -80,8 +80,9 @@ describe("参加者管理画面", () => {
       target: { value: "har" },
     });
 
-    expect(await screen.findByText("参加者の取得に失敗しました。")).toBeInTheDocument();
-    expect(await screen.findByText("ユーザーの検索に失敗しました。")).toBeInTheDocument();
+    expect(
+      await screen.findAllByText("予期しないエラーが発生しました。再試行してください。"),
+    ).toHaveLength(2);
   });
 
   it("追加と無効化の失敗を表示する", async () => {
@@ -94,13 +95,17 @@ describe("参加者管理画面", () => {
 
     expect(await screen.findByText("akira")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "無効にする" }));
-    expect(await screen.findByText("参加状態の変更に失敗しました。")).toBeInTheDocument();
+    expect(
+      await screen.findByText("予期しないエラーが発生しました。再試行してください。"),
+    ).toBeInTheDocument();
 
     fireEvent.change(screen.getByRole("textbox", { name: "nkmzユーザー名で検索" }), {
       target: { value: "har" },
     });
     fireEvent.click(await screen.findByRole("button", { name: "追加" }));
 
-    expect(await screen.findByText("参加者の追加に失敗しました。")).toBeInTheDocument();
+    expect(
+      await screen.findByText("予期しないエラーが発生しました。再試行してください。"),
+    ).toBeInTheDocument();
   });
 });
