@@ -21,7 +21,7 @@ export function meta() {
 }
 
 export default function GroupList() {
-  const { data: groups = [], error, isError, isPending } = useQuery({
+  const { data: groups = [], error, isError, isPending, refetch } = useQuery({
     queryKey: queryKeys.groups,
     queryFn: () => groupClient.list(),
   });
@@ -30,7 +30,7 @@ export default function GroupList() {
     <main className="p-4 pb-24">
       <h1 className="mb-6 text-3xl font-semibold tracking-tight">精算グループ</h1>
       {isPending ? <p role="status">グループを読み込んでいます。</p> : null}
-      {isError ? <p role="alert">{getApiErrorMessage(error)}</p> : null}
+      {isError ? <div className="space-y-2"><p role="alert">{getApiErrorMessage(error)}</p><Button onClick={() => void refetch()} type="button" variant="outline">再試行</Button></div> : null}
       <Table aria-label="精算グループ一覧">
         <TableHeader>
           <TableRow>

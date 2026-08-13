@@ -153,7 +153,7 @@ export default function ParticipantManagement() {
         {normalizedSearchQuery ? (
           <div className="pt-1">
             {userSearchQuery.isPending ? <p role="status">ユーザーを検索しています。</p> : null}
-            {userSearchQuery.isError ? <p role="alert">{getApiErrorMessage(userSearchQuery.error)}</p> : null}
+            {userSearchQuery.isError ? <div className="space-y-2"><p role="alert">{getApiErrorMessage(userSearchQuery.error)}</p><Button onClick={() => void userSearchQuery.refetch()} type="button" variant="outline">再試行</Button></div> : null}
             {!userSearchQuery.isPending && !userSearchQuery.isError && userSearchQuery.data?.length === 0 ? (
               <p className="text-sm text-muted-foreground">該当するユーザーはいません。</p>
             ) : null}
@@ -174,7 +174,7 @@ export default function ParticipantManagement() {
       </section>
 
       {participantsQuery.isPending ? <p role="status">参加者を読み込んでいます。</p> : null}
-      {participantsQuery.isError ? <p role="alert">{getApiErrorMessage(participantsQuery.error)}</p> : null}
+      {participantsQuery.isError ? <div className="space-y-2"><p role="alert">{getApiErrorMessage(participantsQuery.error)}</p><Button onClick={() => void participantsQuery.refetch()} type="button" variant="outline">再試行</Button></div> : null}
       {participantActivityMutation.isError ? <p role="alert">{getApiErrorMessage(participantActivityMutation.error)}</p> : null}
       {!participantsQuery.isPending && !participantsQuery.isError ? (
         <>

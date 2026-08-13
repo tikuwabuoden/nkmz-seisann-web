@@ -25,7 +25,7 @@ export default function ExpenseCreate() {
   });
 
   if (participantsQuery.isPending) return <main className="p-4"><p role="status">参加者を読み込んでいます。</p></main>;
-  if (participantsQuery.isError) return <main className="p-4"><p role="alert">{getApiErrorMessage(participantsQuery.error)}</p></main>;
+  if (participantsQuery.isError) return <main className="space-y-2 p-4"><p role="alert">{getApiErrorMessage(participantsQuery.error)}</p><Button onClick={() => void participantsQuery.refetch()} type="button" variant="outline">再試行</Button></main>;
 
   return <ExpenseCreateForm groupId={groupId} participants={participantsQuery.data} />;
 }
