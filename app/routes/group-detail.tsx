@@ -19,6 +19,7 @@ import { authClient } from '@/features/auth/auth-client';
 import { SettlementResults } from '@/features/settlement/settlement-results';
 import { settlementClient } from '@/features/settlement/settlement-client';
 import { queryKeys } from '@/lib/query-keys';
+import { getApiErrorMessage } from '@/lib/api-client';
 
 function formatJpy(amount: number) {
 	return `¥${amount.toLocaleString('ja-JP')}`;
@@ -30,7 +31,7 @@ export function meta() {
 
 export default function GroupDetail() {
 	const { groupId = '' } = useParams();
-	const { data: expenses = [], isError, isPending } = useQuery({
+	const { data: expenses = [], error: expensesError, isError, isPending, refetch: refetchExpenses } = useQuery({
 		queryKey: queryKeys.expenses(groupId),
 		queryFn: () => expenseClient.list(groupId),
 	});
@@ -61,7 +62,7 @@ export default function GroupDetail() {
 					{isPending ? (
 						<p role="status">支払いを読み込んでいます。</p>
 					) : isError ? (
-						<p role="alert">支払いの取得に失敗しました。</p>
+						<div className="space-y-2"><p role="alert">{getApiErrorMessage(expensesError)}</p><Button onClick={() => void refetchExpenses()} type="button" variant="outline">再試行</Button></div>
 					) : expenses.length === 0 ? (
 						<p>支払いはありません。</p>
 					) : (
@@ -110,7 +111,7 @@ export default function GroupDetail() {
 					{settlementQuery.isPending || currentUserQuery.isPending ? (
 						<p role="status">精算結果を読み込んでいます。</p>
 					) : settlementQuery.isError || currentUserQuery.isError ? (
-						<p role="alert">精算結果の取得に失敗しました。</p>
+						<div className="space-y-2"><p role="alert">{getApiErrorMessage(settlementQuery.error ?? currentUserQuery.error)}</p><Button onClick={() => { void settlementQuery.refetch(); void currentUserQuery.refetch(); }} type="button" variant="outline">再試行</Button></div>
 					) : currentUserQuery.data === null ? (
 						<p role="alert">ログインが必要です。</p>
 					) : (

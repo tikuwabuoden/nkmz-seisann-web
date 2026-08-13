@@ -6,6 +6,7 @@ import { AppFixedActionArea } from "@/components/layout/app-fixed-action-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { groupClient } from "@/features/groups/group-client";
+import { getApiErrorMessage } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
 
 export function meta() {
@@ -48,6 +49,7 @@ export default function GroupCreate() {
           作成者は最初の参加者になります
         </p>
       </form>
+      {createGroup.isError ? <p className="mt-2 text-sm text-destructive" role="alert">{getApiErrorMessage(createGroup.error)}</p> : null}
       <AppFixedActionArea>
         <Button className="w-full" disabled={name.trim() === "" || createGroup.isPending} form="group-create-form" type="submit">
           作成する

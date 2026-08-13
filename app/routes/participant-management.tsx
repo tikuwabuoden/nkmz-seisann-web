@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import type { NkmzUser, Participant } from "@/domain/types";
 import { participantClient } from "@/features/participants/participant-client";
+import { getApiErrorMessage } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
 
 export function meta() {
@@ -152,7 +153,7 @@ export default function ParticipantManagement() {
         {normalizedSearchQuery ? (
           <div className="pt-1">
             {userSearchQuery.isPending ? <p role="status">ユーザーを検索しています。</p> : null}
-            {userSearchQuery.isError ? <p role="alert">ユーザーの検索に失敗しました。</p> : null}
+            {userSearchQuery.isError ? <div className="space-y-2"><p role="alert">{getApiErrorMessage(userSearchQuery.error)}</p><Button onClick={() => void userSearchQuery.refetch()} type="button" variant="outline">再試行</Button></div> : null}
             {!userSearchQuery.isPending && !userSearchQuery.isError && userSearchQuery.data?.length === 0 ? (
               <p className="text-sm text-muted-foreground">該当するユーザーはいません。</p>
             ) : null}
@@ -167,14 +168,14 @@ export default function ParticipantManagement() {
                 user={user}
               />
             ))}
-            {addParticipant.isError ? <p role="alert">参加者の追加に失敗しました。</p> : null}
+            {addParticipant.isError ? <p role="alert">{getApiErrorMessage(addParticipant.error)}</p> : null}
           </div>
         ) : null}
       </section>
 
       {participantsQuery.isPending ? <p role="status">参加者を読み込んでいます。</p> : null}
-      {participantsQuery.isError ? <p role="alert">参加者の取得に失敗しました。</p> : null}
-      {participantActivityMutation.isError ? <p role="alert">参加状態の変更に失敗しました。</p> : null}
+      {participantsQuery.isError ? <div className="space-y-2"><p role="alert">{getApiErrorMessage(participantsQuery.error)}</p><Button onClick={() => void participantsQuery.refetch()} type="button" variant="outline">再試行</Button></div> : null}
+      {participantActivityMutation.isError ? <p role="alert">{getApiErrorMessage(participantActivityMutation.error)}</p> : null}
       {!participantsQuery.isPending && !participantsQuery.isError ? (
         <>
           <ParticipantTable

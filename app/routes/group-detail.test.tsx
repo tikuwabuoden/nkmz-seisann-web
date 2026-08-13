@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Expense } from "@/domain/types";
-import { sampleSettlement, users } from "@/domain/test-data";
+import { sampleExpenses, sampleSettlement, users } from "@/domain/test-data";
 import { authClient } from "@/features/auth/auth-client";
 import { expenseClient } from "@/features/expenses/expense-client";
 import { settlementClient } from "@/features/settlement/settlement-client";
@@ -38,6 +38,7 @@ function openSettlementTab() {
 describe("支払い一覧画面", () => {
   beforeEach(() => {
     vi.spyOn(authClient, "getCurrentUser").mockResolvedValue(users.alice);
+    vi.spyOn(expenseClient, "list").mockResolvedValue(sampleExpenses);
     vi.spyOn(settlementClient, "get").mockResolvedValue(sampleSettlement);
   });
 
@@ -78,7 +79,9 @@ describe("支払い一覧画面", () => {
 
     renderGroupDetail();
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("支払いの取得に失敗しました。");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "予期しないエラーが発生しました。再試行してください。",
+    );
   });
 
   it("精算結果タブにあなたの精算と最終送金案を表示する", async () => {
@@ -111,6 +114,8 @@ describe("支払い一覧画面", () => {
     renderGroupDetail();
     openSettlementTab();
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("精算結果の取得に失敗しました。");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "予期しないエラーが発生しました。再試行してください。",
+    );
   });
 });

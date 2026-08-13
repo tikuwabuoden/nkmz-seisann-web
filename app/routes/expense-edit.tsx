@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type SubmitEvent } from 'react';
-import { Navigate, useParams } from 'react-router';
+import { Link, Navigate, useParams } from 'react-router';
 
 import { AppFixedActionArea } from '@/components/layout/app-fixed-action-area';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ import {
 } from '@/features/expenses/expense-form';
 import { participantClient } from '@/features/participants/participant-client';
 import { queryKeys } from '@/lib/query-keys';
+import { ApiError, getApiErrorMessage } from '@/lib/api-client';
 
 export function meta() {
 	return [{ title: '費目を編集 | nkmz 精算' }];
@@ -48,8 +49,9 @@ export default function ExpenseEdit() {
 		);
 	if (participantsQuery.isError || expenseQuery.isError)
 		return (
-			<main className="p-4">
-				<p role="alert">費目の取得に失敗しました。</p>
+			<main className="space-y-2 p-4">
+				<p role="alert">{getApiErrorMessage(participantsQuery.error ?? expenseQuery.error)}</p>
+				<Button onClick={() => { void participantsQuery.refetch(); void expenseQuery.refetch(); }} type="button" variant="outline">再試行</Button>
 			</main>
 		);
 	if (!expenseQuery.data)
@@ -80,22 +82,31 @@ function ExpenseEditForm({ expense, groupId, participants }: ExpenseEditFormProp
 	const [form, setForm] = useState<ExpenseFormValues>(initialForm);
 	const [errors, setErrors] = useState<string[]>([]);
 	const [hasFinished, setHasFinished] = useState(false);
+	const [wasDeletedElsewhere, setWasDeletedElsewhere] = useState(false);
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 	const discardConfirmation = useDiscardConfirmation(!hasFinished && JSON.stringify(form) !== JSON.stringify(initialForm));
 	const updateExpense = useMutation({
 		mutationFn: (input: NonNullable<ReturnType<typeof validateExpenseForm>['input']>) =>
 			expenseClient.update(groupId, expense.id, input),
+		onError: (error) => {
+			if (error instanceof ApiError && error.status === 404) setWasDeletedElsewhere(true);
+		},
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: queryKeys.expenses(groupId) });
 			await queryClient.invalidateQueries({ queryKey: queryKeys.expense(groupId, expense.id) });
+			await queryClient.invalidateQueries({ queryKey: queryKeys.settlement(groupId) });
 			setHasFinished(true);
 		},
 	});
 	const deleteExpense = useMutation({
 		mutationFn: () => expenseClient.delete(groupId, expense.id),
+		onError: (error) => {
+			if (error instanceof ApiError && error.status === 404) setWasDeletedElsewhere(true);
+		},
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: queryKeys.expenses(groupId) });
 			await queryClient.invalidateQueries({ queryKey: queryKeys.expense(groupId, expense.id) });
+			await queryClient.invalidateQueries({ queryKey: queryKeys.settlement(groupId) });
 			setHasFinished(true);
 		},
 	});
@@ -109,6 +120,13 @@ function ExpenseEditForm({ expense, groupId, participants }: ExpenseEditFormProp
 	}
 
 	if (hasFinished) return <Navigate replace to={`/groups/${groupId}`} />;
+	if (wasDeletedElsewhere)
+		return (
+			<main className="space-y-4 p-4">
+				<p role="alert">費目は他のユーザーに削除されました。</p>
+				<Button asChild><Link to={`/groups/${groupId}`}>グループ詳細へ戻る</Link></Button>
+			</main>
+		);
 
 	return (
 		<main className="p-4 pb-24">
@@ -122,7 +140,7 @@ function ExpenseEditForm({ expense, groupId, participants }: ExpenseEditFormProp
 						))}
 					</ul>
 				) : null}
-				{updateExpense.isError ? <p role="alert">費目の保存に失敗しました。</p> : null}
+				{updateExpense.isError ? <p role="alert">{getApiErrorMessage(updateExpense.error)}</p> : null}
 			</form>
 			<AppFixedActionArea>
 				<Button
@@ -151,7 +169,7 @@ function ExpenseEditForm({ expense, groupId, participants }: ExpenseEditFormProp
 							削除した費目は元に戻せません。
 						</DialogDescription>
 					</DialogHeader>
-					{deleteExpense.isError ? <p role="alert">費目の削除に失敗しました。</p> : null}
+					{deleteExpense.isError ? <p role="alert">{getApiErrorMessage(deleteExpense.error)}</p> : null}
 					<DialogFooter>
 						<DialogClose asChild>
 							<Button disabled={deleteExpense.isPending} type="button" variant="outline">
