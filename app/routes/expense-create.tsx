@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type SubmitEvent } from "react";
-import { Navigate, useParams } from "react-router";
+import { useEffect, useState, type SubmitEvent } from "react";
+import { useNavigate, useParams } from "react-router";
 
 import { AppFixedActionArea } from "@/components/layout/app-fixed-action-area";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,7 @@ interface ExpenseCreateFormProps {
 }
 
 function ExpenseCreateForm({ groupId, participants }: ExpenseCreateFormProps) {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [initialForm] = useState<ExpenseFormValues>(() => createInitialExpenseForm(participants));
   const [form, setForm] = useState<ExpenseFormValues>(initialForm);
@@ -51,6 +52,10 @@ function ExpenseCreateForm({ groupId, participants }: ExpenseCreateFormProps) {
     },
   });
 
+  useEffect(() => {
+    if (isSaved) navigate(`/groups/${groupId}`, { replace: true });
+  }, [groupId, isSaved, navigate]);
+
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const result = validateExpenseForm(form);
@@ -58,8 +63,6 @@ function ExpenseCreateForm({ groupId, participants }: ExpenseCreateFormProps) {
     setErrors(result.errors);
     if (result.input) createExpense.mutate(result.input);
   }
-
-  if (isSaved) return <Navigate replace to={`/groups/${groupId}`} />;
 
   return (
     <main className="p-4 pb-24">
